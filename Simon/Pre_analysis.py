@@ -183,4 +183,34 @@ if PLT == True:
     fig.savefig('DATA_EXPLORATION_season_spread.png', bbox_inches='tight')
 
 
+    "Boxplot parameters in 2006-2016 and 2086-2096"
+    fig = plt.figure(5, figsize = (12,16))
+    fig.suptitle('Evolution of paramater destribution from 2006-2016 to 2086-2096')
+    for i in range(7):
+        ax = fig.add_subplot(4,2,i+1)
+        plt.grid(True)
+        ax.boxplot([Data[0:3650,i,st,mdl,exp],Data[-3650:,i,st,mdl,exp]],labels = ['06-16', '86-96'])
+        plt.title(VARIABLES[i],size = 'xx-large')
+    fig.savefig('DATA_EXPLORATION_evolution_10years_spread.png', bbox_inches='tight')
+    
+    
+    "Boxplot parameters in 2006-2016 and 2086-2096 per season"
+    fig = plt.figure(6, figsize = (30,16))
+    fig.suptitle('Evolution of paramater destribution per season 2006-2016 to 2086-2096',size = 'xx-large')
+    LAB = ['Winter 06-16','Winter 86-96',
+           'Spring 06-16','Sprint 86-96',
+           'Summer 06-16','Summer 86-96',
+           'Autumn 06-16','Autumn 86-96']
+    for i in range(7):
+        ax = fig.add_subplot(4,2,i+1)
+        DAT = [Wi[:910,i,st,mdl,exp],Wi[-910:,i,st,mdl,exp],
+               Sp[:910,i,st,mdl,exp],Sp[-910:,i,st,mdl,exp],
+               Su[:910,i,st,mdl,exp],Su[-910:,i,st,mdl,exp],
+               Au[:910,i,st,mdl,exp],Au[-910:,i,st,mdl,exp]]
+        plt.title(VARIABLES[i],size = 'xx-large')
+        plt.grid(True)
+        ax.boxplot(DAT,labels = LAB)
+    fig.savefig('DATA_EXPLORATION_evolution_10years_season_spread.png', bbox_inches='tight')
+    
+    
 
