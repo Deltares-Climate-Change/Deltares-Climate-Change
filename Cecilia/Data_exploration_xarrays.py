@@ -22,6 +22,7 @@ darr = da.from_array(data, chunks=(33238,7,10,5,2))
 
 dates= pd.date_range(start="2006-01-01",end="2096-12-31")
 experiments=['rcp45','rcp85']
+variables=["rsds","tas","uas","vas","clt","hurs","ps"]
 stations=['Marsdiep Noord','Doove Balg West',
                 'Vliestroom','Doove Balg Oost',
                 'Blauwe Slenk Oost','Harlingen Voorhaven','Dantziggat',
