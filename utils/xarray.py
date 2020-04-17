@@ -18,7 +18,7 @@ def data_to_xarray(data):
     driving_models=['CNRM-CERFACS-CNRM-CM5','ICHEC-EC-EARTH', 'IPSL-IPSL-CM5A-MR','MOHC-HadGEM2-ES','MPI-M-MPI-ESM-LR']
 
     X = xr.DataArray(data, coords=[dates,variables,stations,driving_models,experiments], dims=['time', 'var', 'station','model','exp'])
-
-    #To-Do: Filling in NaN appropriately
+    #Fills NaN Values appropriately
+    X = X.interpolate_na(dim = 'time', method = 'nearest')
 
     return X
