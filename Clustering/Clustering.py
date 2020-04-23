@@ -84,19 +84,41 @@ for n_clusters in range_n_clusters:
     print("For n_clusters =", n_clusters, 
           "The average silhouette_score is :", silhouette_avg)
     sample_silhouette_values = silhouette_samples(SubDataStation, cluster_labels)
+   
+    
+cluster_labels_array = np.array(cluster_labels)
+n_in_clusters = []
+n_in_clusteri = 0
+for i in range(range_n_clusters[0]):
+    n_in_clusteri = len(np.where(cluster_labels_array == i)[0])
+    n_in_clusters.append(n_in_clusteri)
+    print('The number of datapoints in cluster '+str(i)+' is: '+str(n_in_clusteri))
+    
 
-MonthCounter = MonthCounter(cluster_labels,n_clusters)
+Month_Counter = MonthCounter(cluster_labels,n_clusters)
 Year_Counter = YearCounter(cluster_labels,n_clusters)
 
 fig, axes = plt.subplots(nrows=2, ncols=2)
 ax0, ax1, ax2, ax3 = axes.flatten()
 
 
-ax0.hist(Counter, 12, density=True, histtype='bar')
+ax0.hist(Month_Counter, 12, density=True, histtype='bar')
 ax0.legend(prop={'size': 10})
-ax0.set_title('Devide in months')
+ax0.set_title('Divide in months')
 
 
-ax1.hist(Counter, 10, density=True, histtype='bar')
+ax1.hist(Year_Counter, 10, density=True, histtype='bar')
 ax1.legend(prop={'size': 10})
-ax1.set_title('Devide in years')
+ax1.set_title('Divide in years')
+
+
+for var in range(7):
+#var = 0
+    M = []
+    for cl in range(n_clusters):
+        INDX = np.where(cluster_labels_array == cl)
+        M.append(Data[INDX,var,st, mdl, exp])
+    fig, axs = plt.subplots(7, 1)
+    axs.boxplot(M)
+
+plt.show()
