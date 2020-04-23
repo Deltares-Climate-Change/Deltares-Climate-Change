@@ -38,3 +38,17 @@ def DivideInSeasons(X):
         Summer = xr.concat([Summer,X.sel(time=pd.date_range(start=(str(year)+"-06-21"),end=(str(year)+"-09-20")))], dim='time')
         Autumn = xr.concat([Autumn,X.sel(time=pd.date_range(start=(str(year)+"-09-21"),end=(str(year)+"-12-20")))], dim='time')
     return Winter,Spring,Summer,Autumn
+
+
+def YearlyAverage(Data):
+    """
+    Takes the whole dataset as xarray and returns yearly averages for all variables.
+    """
+    yearbeginnings = pd.date_range(start = "2006-01-01", periods = 91, freq = pd.offsets.YearBegin(1))
+    yearends =  pd.date_range(start = "2006-01-01", periods = 91, freq = 'Y')
+    average_xr = Data.sel(time = pd.date_range(start = yearbeginnings[0], end = yearends[0])).mean(dim = 'time')
+    for i in range(1,len(yearbeginnings)):
+        average_xr = xr.concat([average_xr,Data.sel(time = pd.date_range(start = yearbeginnings[i], end = yearends[i])).mean(dim = 'time')], dim = 'year')
+
+    average_xr['year'] = np.arange(2006,2097)
+    return average_xr
