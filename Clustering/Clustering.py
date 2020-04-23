@@ -7,11 +7,10 @@ Created on Thu Apr 23 09:56:56 2020
 import numpy as np
 import matplotlib.pyplot as plt 
 from sklearn.cluster import KMeans
-from sklearn.metrics import silhouette_samples, silhouette_scorekmeans = KMeans(n_clusters=20) #random_state=0
+from sklearn.metrics import silhouette_samples, silhouette_score
 
 
-
-Data = np.load('tensor_daily_mean_5D.npy')
+Data = np.load('../Datares/tensor_daily_mean_5D.npy')
 NanINDX = np.argwhere(np.isnan(Data))
 for i in range(len(NanINDX)):
     Data[NanINDX[i]] = 200
