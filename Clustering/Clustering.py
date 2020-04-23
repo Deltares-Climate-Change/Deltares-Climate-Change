@@ -26,8 +26,7 @@ def YearCounter(Labels,n_clusters):
         Dag += datetime.timedelta(days = 1)
     return(Dat)
 
-
-Data = np.load('tensor_daily_mean_5D.npy')
+Data = np.load('../Datares/tensor_daily_mean_5D.npy')
 NanINDX = np.argwhere(np.isnan(Data))
 for i in range(len(NanINDX)):
     Data[NanINDX[i]] = 200
