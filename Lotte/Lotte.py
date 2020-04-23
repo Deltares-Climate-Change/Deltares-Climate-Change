@@ -121,10 +121,10 @@ def DivideInSeasons(X):
     Summer = X.sel(dates=pd.date_range(start="2006-06-21",end="2006-09-20"))
     Autumn = X.sel(dates=pd.date_range(start="2006-09-21",end="2006-12-20"))
     for year in range(2007,2097):
-        xr.concat(Winter,X.sel(dates=pd.date_range(start=(str(year-1)+"-12-21"),end=(str(year)+"-03-20")), dim='dates')
-        xr.concat(Spring,X.sel(dates=pd.date_range(start=(str(year)+"-03-21"),end=(str(year)+"-06-20")), dim='dates')
-        xr.concat(Summer,X.sel(dates=pd.date_range(start=(str(year)+"-06-21"),end=(str(year)+"-09-20")), dim='dates')
-        xr.concat(Autumn,X.sel(dates=pd.date_range(start=(str(year)+"-09-21"),end=(str(year)+"-12-20")), dim='dates')
+        xr.concat(Winter,X.sel(dates=pd.date_range(start=(str(year-1)+"-12-21"),end=(str(year)+"-03-20"))), dim='dates')
+        xr.concat(Spring,X.sel(dates=pd.date_range(start=(str(year)+"-03-21"),end=(str(year)+"-06-20"))), dim='dates')
+        xr.concat(Summer,X.sel(dates=pd.date_range(start=(str(year)+"-06-21"),end=(str(year)+"-09-20"))), dim='dates')
+        xr.concat(Autumn,X.sel(dates=pd.date_range(start=(str(year)+"-09-21"),end=(str(year)+"-12-20"))), dim='dates')
     return Winter,Spring,Summer,Autumn
 
 ## LOTTE
