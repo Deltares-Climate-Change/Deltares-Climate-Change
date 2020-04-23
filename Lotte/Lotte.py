@@ -13,7 +13,7 @@ from scipy.stats import spearmanr
 import xarray as xr
 
 ##importing data
-data = np.load('tensor_daily_mean_5D.npy')
+data = np.load('Datares/tensor_daily_mean_5D.npy')
 X = data_to_xarray(data)
 X.head()
 
@@ -68,7 +68,7 @@ STATIONS = ['Marsdiep Noord','Doove Balg West',
 
 ##Model names
 mdl = 0
-MODELS = ['CNRM-CERFACS-CNRM-CM5','ICHEC-EC-EARTH', 
+MODELS = ['CNRM-CERFACS-CNRM-CM5','ICHEC-EC-EARTH',
           'IPSL-IPSL-CM5A-MR','MOHC-HadGEM2-ES','MPI-M-MPI-ESM-LR']
 """
 0 'CNRM-CERFACS-CNRM-CM5'
@@ -89,14 +89,14 @@ def CreateCorrelations(X,STATIONS,MODELS):
     corr85 = np.zeros((7,7))
     corr45r = np.zeros((7,7))
     corr85r = np.zeros((7,7))
-    
+
     for station in STATIONS:
         for model in MODELS:
             corr45 += np.corrcoef(X.sel(station= station ,exp= 'rcp45', model= model),rowvar = False)
             corr85 += np.corrcoef(X.sel(station= station ,exp= 'rcp85', model= model),rowvar = False)
             corr45r += spearmanr(X.sel(station= station ,exp= 'rcp45', model= model))[0]
             corr85r += spearmanr(X.sel(station= station ,exp= 'rcp85', model= model))[0]
-    
+
     corr45 = corr45/(len(STATIONS)*len(MODELS))
     corr85 = corr85/(len(STATIONS)*len(MODELS))
     corr45r = corr45r/(len(STATIONS)*len(MODELS))
@@ -107,24 +107,24 @@ def PlotCorrelations(corr1,corr2):
     fig, (ax1, ax2) = plt.subplots(ncols = 2, figsize = (20,7))
     sns.heatmap(corr1,annot=True, xticklabels = variables, yticklabels = variables, ax = ax1)
     sns.heatmap(corr2,annot=True, xticklabels = variables, yticklabels = variables, ax = ax2)
-    
+
     fig.suptitle('Average correlation over stations and models.')
-    ax1.set_title(str(corr1))
-    ax2.set_title(str(corr2))
+    #ax1.set_title(str(corr1))
+    #ax2.set_title(str(corr2))
     plt.show()
     pass
 
 #http://xarray.pydata.org/en/stable/combining.html
 def DivideInSeasons(X):
-    Winter = X.sel(dates=pd.date_range(start="2006-01-01",end="2006-03-20"))
-    Spring = X.sel(dates=pd.date_range(start="2006-03-21",end="2006-06-20"))
-    Summer = X.sel(dates=pd.date_range(start="2006-06-21",end="2006-09-20"))
-    Autumn = X.sel(dates=pd.date_range(start="2006-09-21",end="2006-12-20"))
+    Winter = X.sel(time=pd.date_range(start="2006-01-01",end="2006-03-20"))
+    Spring = X.sel(time=pd.date_range(start="2006-03-21",end="2006-06-20"))
+    Summer = X.sel(time=pd.date_range(start="2006-06-21",end="2006-09-20"))
+    Autumn = X.sel(time=pd.date_range(start="2006-09-21",end="2006-12-20"))
     for year in range(2007,2097):
-        xr.concat(Winter,X.sel(dates=pd.date_range(start=(str(year-1)+"-12-21"),end=(str(year)+"-03-20"))), dim='dates')
-        xr.concat(Spring,X.sel(dates=pd.date_range(start=(str(year)+"-03-21"),end=(str(year)+"-06-20"))), dim='dates')
-        xr.concat(Summer,X.sel(dates=pd.date_range(start=(str(year)+"-06-21"),end=(str(year)+"-09-20"))), dim='dates')
-        xr.concat(Autumn,X.sel(dates=pd.date_range(start=(str(year)+"-09-21"),end=(str(year)+"-12-20"))), dim='dates')
+        Winter = xr.concat([Winter,X.sel(time=pd.date_range(start=(str(year-1)+"-12-21"),end=(str(year)+"-03-20")))], dim='time')
+        Spring = xr.concat([Spring,X.sel(time=pd.date_range(start=(str(year)+"-03-21"),end=(str(year)+"-06-20")))], dim='time')
+        Summer = xr.concat([Summer,X.sel(time=pd.date_range(start=(str(year)+"-06-21"),end=(str(year)+"-09-20")))], dim='time')
+        Autumn = xr.concat([Autumn,X.sel(time=pd.date_range(start=(str(year)+"-09-21"),end=(str(year)+"-12-20")))], dim='time')
     return Winter,Spring,Summer,Autumn
 
 ## LOTTE
