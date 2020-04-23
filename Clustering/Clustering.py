@@ -26,7 +26,8 @@ def YearCounter(Labels,n_clusters):
         Dag += datetime.timedelta(days = 1)
     return(Dat)
 
-Data = np.load('../Datares/tensor_daily_mean_5D.npy')
+
+Data = np.load('tensor_daily_mean_5D.npy')
 NanINDX = np.argwhere(np.isnan(Data))
 for i in range(len(NanINDX)):
     Data[NanINDX[i]] = 200
@@ -72,7 +73,7 @@ for i in range(SubData.shape[1]):
 
 SubDataStation = SubData[:,:,st] #Select the station that we are going to analyse
 
-range_n_clusters = [3]
+range_n_clusters = [4]
 
 for n_clusters in range_n_clusters:
     clusterer = KMeans(n_clusters=n_clusters, random_state=10).fit(SubDataStation)
@@ -92,7 +93,7 @@ fig, axes = plt.subplots(nrows=2, ncols=2)
 ax0, ax1, ax2, ax3 = axes.flatten()
 
 
-ax0.hist(Counter, 12, density=True, histtype='bar')
+ax0.hist(MonthCounter, 12, density=True, histtype='bar')
 ax0.legend(prop={'size': 10})
 ax0.set_title('Devide in months')
 
@@ -100,3 +101,5 @@ ax0.set_title('Devide in months')
 ax1.hist(Counter, 10, density=True, histtype='bar')
 ax1.legend(prop={'size': 10})
 ax1.set_title('Devide in years')
+
+fig.savefig('CLUSTERING_first_attempt.png', bbox_inches='tight')
