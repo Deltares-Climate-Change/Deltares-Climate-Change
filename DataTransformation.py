@@ -2,9 +2,16 @@ import numpy as np
 from utils.xarray import data_to_xarray
 import pandas as pd
 
+##importing data
 data = np.load('Datares/tensor_daily_mean_5D.npy')
 X = data_to_xarray(data)
 X.head()
+
+##making the mean 0 and the standard deviation 1
+# std = 1
+# for i in range(X.shape[1]):
+#     X[:,i] = X[:,i] - X[:,i].mean()
+#     X[:,i] = X[:,i]/(X[:,i].std(ddof = std))
 
 dates= pd.date_range(start="2006-01-01",end="2096-12-31")
 
