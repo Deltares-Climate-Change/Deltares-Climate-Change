@@ -13,8 +13,10 @@ X.head()
 #     X[:,i] = X[:,i] - X[:,i].mean()
 #     X[:,i] = X[:,i]/(X[:,i].std(ddof = std))
 
+##Dates
 dates= pd.date_range(start="2006-01-01",end="2096-12-31")
 
+##Variable names
 var= 1
 variables = ["rsds","tas","uas","vas","clt","hurs","ps"]
 VARIABLES = ['Surface Downwelling Shortwave Radiation',
@@ -33,6 +35,8 @@ VARIABLES = ['Surface Downwelling Shortwave Radiation',
 5 hurs - Near-Surface Relative Humidity
 6 ps - Surface Pressure
 """
+
+##Station names
 st = 0
 STATIONS = ['Marsdiep Noord','Doove Balg West',
                 'Vliestroom','Doove Balg Oost',
@@ -52,6 +56,7 @@ STATIONS = ['Marsdiep Noord','Doove Balg West',
 9 'Harlingen Havenmond West'
 """
 
+##Model names
 mdl = 0
 MODELS = ['CNRM-CERFACS-CNRM-CM5','ICHEC-EC-EARTH', 
           'IPSL-IPSL-CM5A-MR','MOHC-HadGEM2-ES','MPI-M-MPI-ESM-LR']
@@ -62,5 +67,7 @@ MODELS = ['CNRM-CERFACS-CNRM-CM5','ICHEC-EC-EARTH',
 3 'MOHC-HadGEM2-ES'
 4 'MPI-M-MPI-ESM-LR'
 """
+
+##Experiment names
 exp = 0
 EXPERIMENTS = ['rcp45','rcp85']
