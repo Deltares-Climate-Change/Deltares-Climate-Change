@@ -1,5 +1,6 @@
 import numpy as np
 from utils.xarray import data_to_xarray
+import pandas as pd
 
 data = np.load('Datares/tensor_daily_mean_5D.npy')
 X = data_to_xarray(data)
