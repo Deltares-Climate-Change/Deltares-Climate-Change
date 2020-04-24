@@ -24,7 +24,7 @@ def data_to_xarray(data):
     return X
 
 
-def DivideInSeasons(X):
+def divide_in_seasons(X):
     """
     Takes the whole dataset and return one xarrays for each season.
     """
@@ -40,7 +40,7 @@ def DivideInSeasons(X):
     return Winter,Spring,Summer,Autumn
 
 
-def YearlyAverage(Data):
+def yearly_average(Data):
     """
     Takes the whole dataset as xarray and returns yearly averages for all variables.
     """

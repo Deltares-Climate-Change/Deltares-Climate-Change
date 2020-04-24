@@ -12,7 +12,7 @@ X = data_to_xarray(data)
 X.head()
 
 #Get Yearly Averages
-X_yearly = YearlyAverage(X)
+X_yearly = yearly_average(X)
 
 #Linaer Regression for a selected setting
 x = np.array(X_yearly['year']).reshape((-1,1))
