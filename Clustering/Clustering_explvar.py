@@ -31,7 +31,7 @@ def YearCounter(Labels,n_clusters):
 Data = np.load('../Datares/tensor_daily_mean_5D.npy')
 NanINDX = np.argwhere(np.isnan(Data))
 for i in range(len(NanINDX)):
-    Data[NanINDX[i]] = 200
+    Data[NanINDX[i][0],NanINDX[i][1],NanINDX[i][2],NanINDX[i][3],NanINDX[i][4]] = 200
 st = 0
 STATIONS = ['Marsdiep Noord','Doove Balg West',
                 'Vliestroom','Doove Balg Oost',
@@ -149,10 +149,10 @@ for var in range(7):
     M = []
     for cl in range(n_clusters):
         INDX = np.where(cluster_labels_array == cl)
-        new = Data[INDX,var,st, mdl, exp]
+        new = SubDataStation[INDX,var]
         M.append(new[0])
     ax.boxplot(M, labels = LAB)
+    plt.grid(True)
 fig.savefig('Clustering_exploring_variables_percluster.png', bbox_inches='tight')
-print(type(M))
 
 plt.show()
