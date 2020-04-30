@@ -26,7 +26,7 @@ def data_to_xarray(data):
 
 def divide_in_seasons(X):
     """
-    Takes the whole dataset and return one xarrays for each season.
+    Takes the whole dataset and return one xarray for each season.
     """
     Winter = X.sel(time=pd.date_range(start="2006-01-01",end="2006-03-20"))
     Spring = X.sel(time=pd.date_range(start="2006-03-21",end="2006-06-20"))
