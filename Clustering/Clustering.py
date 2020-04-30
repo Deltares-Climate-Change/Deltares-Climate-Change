@@ -28,7 +28,7 @@ def YearCounter(Labels,n_clusters):
 Data = np.load('../Datares/tensor_daily_mean_5D.npy')
 NanINDX = np.argwhere(np.isnan(Data))
 for i in range(len(NanINDX)):
-    Data[NanINDX[i]] = 200
+    Data[NanINDX[i][0],NanINDX[i][1],NanINDX[i][2],NanINDX[i][3],NanINDX[i][4]] = 200
 st = 0
 STATIONS = ['Marsdiep Noord','Doove Balg West',
                 'Vliestroom','Doove Balg Oost',

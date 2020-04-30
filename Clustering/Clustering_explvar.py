@@ -31,7 +31,7 @@ def YearCounter(Labels,n_clusters):
 Data = np.load('../Datares/tensor_daily_mean_5D.npy')
 NanINDX = np.argwhere(np.isnan(Data))
 for i in range(len(NanINDX)):
-    Data[NanINDX[i]] = 200
+    Data[NanINDX[i][0],NanINDX[i][1],NanINDX[i][2],NanINDX[i][3],NanINDX[i][4]] = 200
 st = 0
 STATIONS = ['Marsdiep Noord','Doove Balg West',
                 'Vliestroom','Doove Balg Oost',
@@ -61,6 +61,15 @@ MODELS = ['CNRM-CERFACS-CNRM-CM5','ICHEC-EC-EARTH',
 3 'MOHC-HadGEM2-ES'
 4 'MPI-M-MPI-ESM-LR'
 """
+
+VARIABLES = ['Surface Downwelling Shortwave Radiation',
+             'Near-surface air temperature',
+             'Eastward near-surface wind',
+             'Northward near-surface wind',
+             'Cloud cover',
+             'Near-surface relative humidity',
+             'Surface pressure']
+
 exp = 0
 EXPERIMENTS = ['rcp45','rcp85']
 
@@ -136,13 +145,14 @@ LAB = ['cluster 1', 'cluster 2', 'cluster 3']
 for var in range(7):
 #var = 0
     ax = fig.add_subplot(4, 2, var+1)
+    ax.set_title(VARIABLES[var])
     M = []
     for cl in range(n_clusters):
         INDX = np.where(cluster_labels_array == cl)
-        new = Data[INDX,var,st, mdl, exp]
+        new = SubDataStation[INDX,var]
         M.append(new[0])
     ax.boxplot(M, labels = LAB)
+    plt.grid(True)
 fig.savefig('Clustering_exploring_variables_percluster.png', bbox_inches='tight')
-print(type(M))
 
 plt.show()
