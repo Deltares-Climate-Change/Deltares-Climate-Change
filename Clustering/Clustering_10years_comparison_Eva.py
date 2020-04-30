@@ -49,7 +49,7 @@ STATIONS = ['Marsdiep Noord','Doove Balg West',
 9 'Harlingen Havenmond West'
 """
 
-mdl = 0
+mdl = 4
 MODELS = ['CNRM-CERFACS-CNRM-CM5','ICHEC-EC-EARTH', 
           'IPSL-IPSL-CM5A-MR','MOHC-HadGEM2-ES','MPI-M-MPI-ESM-LR']
 """
@@ -64,55 +64,62 @@ EXPERIMENTS = ['rcp45','rcp85']
 
 SubData = Data[:,:,:,mdl,exp]
 
+n_clusters = 3
 std = 1
-
 for i in range(SubData.shape[1]):
     SubData[:,i,:] = SubData[:,i,:]-SubData[:,i,:].mean()
     SubData[:,i,:] = SubData[:,i,:]/(SubData[:,i,:].std(ddof = std))
-
-SubDataStation = SubData[:,:,st] #Select the station that we are going to analyse
-
-range_n_clusters = [3]
-
-for n_clusters in range_n_clusters:
+    
+def clustering(SubData,n_clusters,st):    
+    SubDataStation = SubData[:,:,st] #Select the station that we are going to analyse
     #2006-2016
     data1 = SubDataStation[:][3650:]
     clusterer = KMeans(n_clusters=n_clusters, random_state=10).fit(data1)
     cluster_labels = clusterer.labels_
-    silhouette_avg = silhouette_score(data1, cluster_labels)   
-    print("For n_clusters =", n_clusters, 
-          "The average silhouette_score is :", silhouette_avg)
-    sample_silhouette_values = silhouette_samples(data1, cluster_labels)
     #2086-2096
     data2 = SubDataStation[:][-3650:]
     clusterer2 = KMeans(n_clusters=n_clusters, random_state=10).fit(data2)
     cluster_labels2 = clusterer2.labels_
-    silhouette_avg = silhouette_score(data2, cluster_labels2)   
-    print("For n_clusters =", n_clusters, 
-          "The average silhouette_score is :", silhouette_avg)
-    sample_silhouette_values = silhouette_samples(data1, cluster_labels)
-
-Month_Counter = MonthCounter(cluster_labels,n_clusters)
-Year_Counter = YearCounter(cluster_labels,n_clusters)
-Year_Counter2 = YearCounter(cluster_labels2,n_clusters)
-Month_Counter2 = MonthCounter(cluster_labels2,n_clusters)
-
-fig, axes = plt.subplots(nrows=2, ncols=2)
-ax0, ax1, ax2, ax3 = axes.flatten()
+    Month_Counter_first = MonthCounter(cluster_labels,n_clusters)
+    Month_Counter_last = MonthCounter(cluster_labels2,n_clusters)
+    return(Month_Counter_first,Month_Counter_last)
 
 
-ax0.hist(Month_Counter, 12, density=True, histtype='bar')
-ax0.legend(prop={'size': 10})
+fig, axes = plt.subplots(nrows=2, ncols=5)
+ax0, ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8, ax9  = axes.flatten()
+#ax10, ax11, ax12, ax13, ax14, ax15, ax17, ax18, ax19
+
+#station 1
+Month_Counter_first1,Month_Counter_last1 = clustering(SubData,n_clusters, 1)
+ax0.hist(Month_Counter_first1, 12, density=True, histtype='bar')
 ax0.set_title('Divide in months')
+ax5.hist(Month_Counter_last1, 12, density=True, histtype='bar')
+ax5.set_title('Divide in months')
 
-ax2.hist(Month_Counter2, 12, density=True, histtype='bar')
-ax2.legend(prop={'size': 10})
+#station 2
+Month_Counter_first2,Month_Counter_last2 = clustering(SubData,n_clusters, 2)
+ax1.hist(Month_Counter_first2, 12, density=True, histtype='bar')
+ax1.set_title('Divide in months')
+ax6.hist(Month_Counter_last2, 12, density=True, histtype='bar')
+ax6.set_title('Divide in months')
+
+#station 3
+Month_Counter_first3,Month_Counter_last3 = clustering(SubData,n_clusters, 3)
+ax2.hist(Month_Counter_first3, 12, density=True, histtype='bar')
 ax2.set_title('Divide in months')
+ax7.hist(Month_Counter_last3, 12, density=True, histtype='bar')
+ax7.set_title('Divide in months')
 
-ax1.hist(Year_Counter, 10, density=True, histtype='bar')
-ax1.legend(prop={'size': 10})
-ax1.set_title('Divide in years')
+#station 4
+Month_Counter_first4,Month_Counter_last4 = clustering(SubData,n_clusters, 4)
+ax3.hist(Month_Counter_first4, 12, density=True, histtype='bar')
+ax3.set_title('Divide in months')
+ax8.hist(Month_Counter_last4, 12, density=True, histtype='bar')
+ax8.set_title('Divide in months')
 
-ax3.hist(Year_Counter2, 10, density=True, histtype='bar')
-ax3.legend(prop={'size': 10})
-ax3.set_title('Divide in years')
+#station 5
+Month_Counter_first5,Month_Counter_last5 = clustering(SubData,n_clusters, 5)
+ax4.hist(Month_Counter_first5, 12, density=True, histtype='bar')
+ax4.set_title('Divide in months')
+ax9.hist(Month_Counter_last5, 12, density=True, histtype='bar')
+ax9.set_title('Divide in months')
