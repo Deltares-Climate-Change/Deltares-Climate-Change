@@ -61,6 +61,15 @@ MODELS = ['CNRM-CERFACS-CNRM-CM5','ICHEC-EC-EARTH',
 3 'MOHC-HadGEM2-ES'
 4 'MPI-M-MPI-ESM-LR'
 """
+
+VARIABLES = ['Surface Downwelling Shortwave Radiation',
+             'Near-surface air temperature',
+             'Eastward near-surface wind',
+             'Northward near-surface wind',
+             'Cloud cover',
+             'Near-surface relative humidity',
+             'Surface pressure']
+
 exp = 0
 EXPERIMENTS = ['rcp45','rcp85']
 
@@ -136,6 +145,7 @@ LAB = ['cluster 1', 'cluster 2', 'cluster 3']
 for var in range(7):
 #var = 0
     ax = fig.add_subplot(4, 2, var+1)
+    ax.set_title(VARIABLES[var])
     M = []
     for cl in range(n_clusters):
         INDX = np.where(cluster_labels_array == cl)
