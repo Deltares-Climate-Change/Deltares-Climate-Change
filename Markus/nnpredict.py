@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from utils.common import *
+import seaborn as sns
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -61,11 +62,11 @@ def normalize_data(X):
 X_prime, Y_prime, xstds, ystds, xmeans, ymeans = normalize_data(X)
 
 #Splitting into Train and Test data
-X_train = torch.tensor(np.array(X_prime[:100,:]), dtype = torch.float32)
-Y_train = torch.tensor(np.array(X_prime[:100,:]), dtype = torch.float32)
+X_train = torch.tensor(np.array(X_prime[:1000,:]), dtype = torch.float32)
+Y_train = torch.tensor(np.array(X_prime[:1000,:]), dtype = torch.float32)
 
-X_test = torch.tensor(np.array(X_prime[100:,:]), dtype = torch.float32)
-Y_test = torch.tensor(np.array(X_prime[100:,:]), dtype = torch.float32)
+X_test = torch.tensor(np.array(X_prime[1000:,:]), dtype = torch.float32)
+Y_test = torch.tensor(np.array(X_prime[1000:,:]), dtype = torch.float32)
 
 
 #Training Loop
@@ -73,9 +74,9 @@ net = Densenet(len(variables), len(variables))
 optimizer = torch.optim.Adam(net.parameters(), lr = 0.01)
 
 
-for epoch in range(200):
+for epoch in range(1000):
     optimizer.zero_grad()
-    batch_idx = np.random.randint(low = 0,high = 100, size = 50)
+    batch_idx = np.random.randint(low = 0,high = 1000, size = 50)
     minibatch = X_train[batch_idx,:]
     output = net.forward(minibatch)
     loss = F.mse_loss(output, Y_train[batch_idx])
@@ -91,5 +92,28 @@ train_error = F.mse_loss(net.forward(X_train), Y_train)
 test_error = F.mse_loss(net.forward(X_test), Y_test)
 
 
-train_error
-test_error
+
+#Plotting
+fig, axs = plt.subplots(len(variables),1, figsize = (30,50))
+for sel_var in range(len(variables)):
+
+    alpha = 0.01
+    min_periods = 30
+
+    predictions = ((net.forward(X_test)[:,sel_var].detach().numpy()) * ystds[sel_var].values)+ ymeans[sel_var].values
+
+    ypred = pd.DataFrame(predictions).ewm(alpha = alpha, min_periods = min_periods).mean()
+    ypred = np.array(ypred)[:,0]
+
+    ytrue = pd.DataFrame(Y_test[:,sel_var] * ystds[sel_var].values + ymeans[sel_var].values).ewm(alpha = alpha, adjust = True, min_periods = min_periods).mean()
+    ytrue = np.array(ytrue)[:,0]
+
+
+    plt.sca(axs[sel_var])
+    plt.plot(ypred, label = 'Netword Predictions')
+    plt.plot(ytrue, label = 'Ground Truth')
+    plt.title(str(variables[sel_var]))
+    plt.legend()
+
+
+fig.suptitle('Predicting ' + models[0] + 'from the first 1000 days of ' + models[1] + '. Exponential Weighted Average Plot with smoothing factor ' + str(alpha) + '.', fontsize = 20)
