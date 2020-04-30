@@ -29,3 +29,5 @@ driving_models=['CNRM-CERFACS-CNRM-CM5','ICHEC-EC-EARTH', 'IPSL-IPSL-CM5A-MR','M
 c=X.sel(var='rsds',station= 'Marsdiep Noord' ,exp= 'rcp45', model= 'CNRM-CERFACS-CNRM-CM5')
 plot_acf(c)
 plot_acf(c,lags=33237)
+plot_acf(c,lags=3000)
+plot_pacf(c,lags=33237)
