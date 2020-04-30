@@ -29,7 +29,9 @@ def YearCounter(Labels,n_clusters,StartTime):
 Data = np.load('../Datares/tensor_daily_mean_5D.npy')
 NanINDX = np.argwhere(np.isnan(Data))
 for i in range(len(NanINDX)):
-    Data[NanINDX[i]] = 200
+    Data[NanINDX[i][0],NanINDX[i][1],NanINDX[i][2],NanINDX[i][3],NanINDX[i][4]] = 200
+
+
 st = 0
 STATIONS = ['Marsdiep Noord','Doove Balg West',
                 'Vliestroom','Doove Balg Oost',
@@ -72,7 +74,7 @@ for i in range(SubData.shape[1]):
 
 SubDataStation = SubData[:,:,st] #Select the station that we are going to analyse
 
-range_n_clusters = [3]
+range_n_clusters = [4]
 
 for n_clusters in range_n_clusters:
     data1 = SubDataStation
@@ -98,23 +100,33 @@ Year_Counter1 = YearCounter(cluster_labels1,n_clusters,Start1)
 Year_Counter2 = YearCounter(cluster_labels2,n_clusters,Start2)
 Month_Counter2 = MonthCounter(cluster_labels2,n_clusters,Start2)
 
+
+MC = []
+YC = []
+for i in range(len(Month_Counter)):
+    MC.append(Month_Counter1[i])
+    MC.append(Month_Counter2[i])
+    YC.append(Year_Counter1[i])
+    YC.append(Year_Counter2[i])
+    
+LAB = len(Month_Counter1)*['First 10 Years','Last 10 Years']
+
+
 fig, axes = plt.subplots(nrows=2, ncols=2)
 ax0, ax1, ax2, ax3 = axes.flatten()
-
-
+Col = [(0.1, 0.2, 0.5),(0.1, 0.5, 0.8),(0.3, 0.2, 0.5),(0.3, 0.5, 0.8),(0.5, 0.2, 0.5),(0.5, 0.5, 0.8),(0.7, 0.2, 0.5),(0.7, 0.5, 0.8)]
 ax0.hist(Month_Counter, 12, density=True, histtype='bar')
 ax0.set_title('Divide in months')
 
-ax2.hist(Month_Counter1+Month_Counter2, 12, density=True, histtype='bar')
+ax2.hist(MC, 12, density=True, histtype='bar',label=LAB)
 ax2.set_title('Divide in months')
+ax2.legend(prop={'size': 10})
 
-
-ax1.hist(Year_Counter, 10, density=True, histtype='bar')
+ax1.hist(Year_Counter, 10, density=True, histtype='bar',label=LAB)
 ax1.set_title('Divide in years')
 
-ax3.hist(Year_Counter1+Year_Counter2, 10, density=True, histtype='bar')
+ax3.hist(YC, 10, density=True, histtype='bar')
 ax3.set_title('Divide in years')
+ax3.legend(prop={'size': 10})
 
-
-#ax5.legend(prop={'size': 10})
 
