@@ -45,15 +45,27 @@ plt.plot(temp1,temp2,',')
 
 
 #let's go to compare the different variables with nearest neighbors
-var1 = X.sel(station= 'Marsdiep Noord' ,exp= 'rcp45', model= 'CNRM-CERFACS-CNRM-CM5')
-var2 = X.sel(station= 'Marsdiep Noord' ,exp= 'rcp45', model= 'ICHEC-EC-EARTH')
+var1 = X.sel(var='tas',station= 'Marsdiep Noord' ,exp= 'rcp45', model= 'CNRM-CERFACS-CNRM-CM5')
+var2 = X.sel(var='tas',station= 'Marsdiep Noord' ,exp= 'rcp45', model= 'ICHEC-EC-EARTH')
 newvars=xr.concat([var1, var2], 'var')
-nbrs = NearestNeighbors(n_neighbors=5, algorithm='ball_tree').fit(newvars)
-distances, indices = nbrs.kneighbors(newvars)
-nbrs.kneighbors_graph(newvars).toarray() #The dataset is structured such that points nearby in index order are nearby in parameter space, leading to an approximately block-diagonal matrix of K-nearest neighbors. 
-#ALTERBATIVE: KDTree
-kdt = KDTree(newvars, leaf_size=30, metric='euclidean')
+nbrs = NearestNeighbors(n_neighbors=5, algorithm='ball_tree').fit(var1)
+distances, indices = nbrs.kneighbors(var1)
+nbrs.kneighbors_graph(var1).toarray() 
+#The dataset is structured such that points nearby in index order are nearby in parameter space, leading to an approximately block-diagonal matrix of K-nearest neighbors. 
+#ALTERNATIVE: KDTree
 
+kdt = KDTree(var1, leaf_size=30, metric='euclidean')
+
+from sklearn.neighbors import KNeighborsClassifier
+
+model = KNeighborsClassifier(n_neighbors=3)
+
+# Train the model using the training sets
+model.fit(features,label)
+
+#Predict Output
+predicted= model.predict([[0,2]]) # 0:Overcast, 2:Mild
+print(predicted)
 
 
 
