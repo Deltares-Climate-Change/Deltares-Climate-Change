@@ -10,6 +10,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from utils.common import data_to_xarray
 import seaborn as sns
+from sklearn.neighbors import KDTree
 from scipy.stats import spearmanr
 from statsmodels.graphics.tsaplots import plot_acf
 from statsmodels.graphics.tsaplots import plot_pacf
@@ -32,3 +33,11 @@ plot_acf(c,lags=33237)
 plot_acf(c,lags=3000)
 plot_pacf(c,lags=33237)
 plot_pacf(c,lags=3000)
+
+temp1 = X.sel(var='uas',station= 'Marsdiep Noord' ,exp= 'rcp45', model= 'CNRM-CERFACS-CNRM-CM5')
+temp2 = X.sel(var='uas',station= 'Marsdiep Noord' ,exp= 'rcp45', model= 'ICHEC-EC-EARTH')
+temp1=np.array(temp1)
+temp2=np.array(temp2)
+plt.plot(temp1,temp2,',')
+kdt = KDTree(X, leaf_size=30, metric='euclidean')
+kdt.query(X, k=2, return_distance=False)
