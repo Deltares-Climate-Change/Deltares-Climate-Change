@@ -32,6 +32,8 @@ Data = np.load('../Datares/tensor_daily_mean_5D.npy')
 NanINDX = np.argwhere(np.isnan(Data))
 for i in range(len(NanINDX)):
     Data[NanINDX[i][0],NanINDX[i][1],NanINDX[i][2],NanINDX[i][3],NanINDX[i][4]] = 200
+
+
 st = 0
 STATIONS = ['Marsdiep Noord','Doove Balg West',
                 'Vliestroom','Doove Balg Oost',
@@ -83,7 +85,7 @@ for i in range(SubData.shape[1]):
 
 SubDataStation = SubData[:,:,st] #Select the station that we are going to analyse
 
-range_n_clusters = [3]
+range_n_clusters = [2]
 
 for n_clusters in range_n_clusters:
     clusterer = KMeans(n_clusters=n_clusters, random_state=10).fit(SubDataStation)
@@ -106,52 +108,63 @@ for i in range(range_n_clusters[0]):
     print('The number of datapoints in cluster '+str(i)+' is: '+str(n_in_clusteri))
     
 
+
+## Plotting the clusters in bar plots over the months and years
 Month_Counter = MonthCounter(cluster_labels,n_clusters)
 Year_Counter = YearCounter(cluster_labels,n_clusters)
 
-#fig, axes = plt.subplots(nrows=2, ncols=2)
-#ax0, ax1, ax2, ax3 = axes.flatten()
-#
-#
-#ax0.hist(Month_Counter, 12, density=True, histtype='bar')
-#ax0.legend(prop={'size': 10})
-#ax0.set_title('Divide in months')
-#
-#
-#ax1.hist(Year_Counter, 10, density=True, histtype='bar')
-#ax1.legend(prop={'size': 10})
-#ax1.set_title('Divide in years')
+fig, axes = plt.subplots(nrows=1, ncols=2)
+ax0, ax1 = axes.flatten()
 
-#fig = plt.figure(3, figsize = (30,16))
-#fig.suptitle('Evolution of paramater destribution per season',size = 'xx-large')
-#LAB = ['Winter 2006','Winter 2096',
-#       'Spring 2006','Sprint 2096',
-#       'Summer 2006','Summer 2096',
-#       'Autumn 2006','Autumn 2096']
-#for i in range(7):
-#    ax = fig.add_subplot(4,2,i+1)
-#    DAT = [Wi[:91,i,st,mdl,exp],Wi[-91:,i,st,mdl,exp],
-#           Sp[:91,i,st,mdl,exp],Sp[-91:,i,st,mdl,exp],
-#           Su[:91,i,st,mdl,exp],Su[-91:,i,st,mdl,exp],
-#           Au[:91,i,st,mdl,exp],Au[-91:,i,st,mdl,exp]]
-#    plt.title(VARIABLES[i],size = 'xx-large')
-#    plt.grid(True)
-#    ax.boxplot(DAT,labels = LAB)
-#fig.savefig('DATA_EXPLORATION_evolution_season_spread.png', bbox_inches='tight')
+ax0.hist(Month_Counter, 12, density=True, histtype='bar')
+ax0.legend(prop={'size': 10})
+ax0.set_title('Divide in months')
 
-fig = plt.figure(1, figsize = (30,16))
-fig.suptitle('Paramater destribution per cluster',size = 'xx-large')
-LAB = ['cluster 1', 'cluster 2', 'cluster 3']
+
+ax1.hist(Year_Counter, 10, density=True, histtype='bar')
+ax1.legend(prop={'size': 10})
+ax1.set_title('Divide in years')
+
+## Plotting the variables in box plots of the different clusters standardised
+fig = plt.figure(2, figsize = (30,16))
+fig.suptitle('Paramater destribution per cluster standardised',size = 'xx-large')
+LAB = ['cluster 1', 'cluster 2']
 for var in range(7):
 #var = 0
     ax = fig.add_subplot(4, 2, var+1)
     ax.set_title(VARIABLES[var])
     M = []
+    INDX = []
     for cl in range(n_clusters):
         INDX = np.where(cluster_labels_array == cl)
         new = SubDataStation[INDX,var]
         M.append(new[0])
-    ax.boxplot(M, labels = LAB)
+#    M.append(Data[:,var,st, mdl, exp])
+    ax.boxplot(M)
+    plt.grid(True)
+fig.savefig('Clustering_exploring_variables_percluster_standardised.png', bbox_inches='tight')
+
+Data = np.load('../Datares/tensor_daily_mean_5D.npy')
+NanINDX = np.argwhere(np.isnan(Data))
+for i in range(len(NanINDX)):
+    Data[NanINDX[i][0],NanINDX[i][1],NanINDX[i][2],NanINDX[i][3],NanINDX[i][4]] = 200
+
+## Plotting the variables in box plots of the different clusters 
+fig = plt.figure(3, figsize = (30,16))
+fig.suptitle('Paramater destribution per cluster',size = 'xx-large')
+LAB = ['cluster 1', 'cluster 2']
+for var in range(7):
+#var = 0
+    ax = fig.add_subplot(4, 2, var+1)
+    ax.set_title(VARIABLES[var])
+    M = []
+    INDX = []
+    for cl in range(n_clusters):
+        INDX = np.where(cluster_labels_array == cl)
+        new = Data[INDX,var,st, mdl, exp]
+        M.append(new[0])
+#    M.append(Data[:,var,st, mdl, exp])
+    ax.boxplot(M)
     plt.grid(True)
 fig.savefig('Clustering_exploring_variables_percluster.png', bbox_inches='tight')
 
