@@ -21,5 +21,13 @@ for (i,var) in enumerate(variables):
         cmatrix += spearmanr(X.sel(var = var, exp = 'rcp45', station = station))[0]
     cmatrix = cmatrix/len(stations)
     plt.sca(ax[i])
+    print(var)
     ax[i].set_title(var)
     sns.heatmap(cmatrix, annot=True, xticklabels = models, yticklabels = models)
+
+
+x1 = X.sel(var = 'ps', exp = 'rcp45', station = stations[0], model = models[0])
+x2 = X.sel(var = 'ps', exp = 'rcp45', station = stations[0], model = models[1])
+
+pd.DataFrame.ewm(x1.to_pandas(), alpha = 0.005).mean().plot()
+pd.DataFrame.ewm(x2.to_pandas(), alpha = 0.005).mean().plot()

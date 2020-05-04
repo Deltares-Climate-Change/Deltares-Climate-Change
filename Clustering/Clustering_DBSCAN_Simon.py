@@ -1,34 +1,42 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Apr 23 09:56:56 2020
+
 @author: simon
 """
 import datetime
 import numpy as np
 import matplotlib.pyplot as plt 
 from sklearn.cluster import KMeans
+from sklearn.cluster import DBSCAN
 from sklearn.metrics import silhouette_samples, silhouette_score
 
-def MonthCounter(Labels,n_clusters):
+plt.close('all')
+
+def MonthCounter(Labels,n_clusters,StartTime):
     Dat = [[] for i in range(n_clusters)]
-    Dag = datetime.date(2006,1,1)
+    Dag = StartTime
     for i in range(len(Labels)):
-        Dat[Labels[i]].append(Dag.month)
-        Dag += datetime.timedelta(days = 1)
+        if Labels[i]>=0:
+            Dat[Labels[i]].append(Dag.month)
+            Dag += datetime.timedelta(days = 1)
     return(Dat)
     
-def YearCounter(Labels,n_clusters):
+def YearCounter(Labels,n_clusters,StartTime):
     Dat = [[] for i in range(n_clusters)]
-    Dag = datetime.date(2006,1,1)
+    Dag = StartTime
     for i in range(len(Labels)):
-        Dat[Labels[i]].append(Dag.year)
-        Dag += datetime.timedelta(days = 1)
+        if Labels[i]>=0:
+            Dat[Labels[i]].append(Dag.year)
+            Dag += datetime.timedelta(days = 1)
     return(Dat)
 
 Data = np.load('../Datares/tensor_daily_mean_5D.npy')
 NanINDX = np.argwhere(np.isnan(Data))
 for i in range(len(NanINDX)):
-    Data[NanINDX[i]] = 200
+    Data[NanINDX[i][0],NanINDX[i][1],NanINDX[i][2],NanINDX[i][3],NanINDX[i][4]] = 200
+
+
 st = 0
 STATIONS = ['Marsdiep Noord','Doove Balg West',
                 'Vliestroom','Doove Balg Oost',
@@ -71,53 +79,38 @@ for i in range(SubData.shape[1]):
 
 SubDataStation = SubData[:,:,st] #Select the station that we are going to analyse
 
-range_n_clusters = [3]
 
-for n_clusters in range_n_clusters:
-    clusterer = KMeans(n_clusters=n_clusters, random_state=10).fit(SubDataStation)
-    cluster_labels = clusterer.labels_
-    silhouette_avg = silhouette_score(SubDataStation, cluster_labels)
-    
-    
-    
-    print("For n_clusters =", n_clusters, 
-          "The average silhouette_score is :", silhouette_avg)
-    sample_silhouette_values = silhouette_samples(SubDataStation, cluster_labels)
-   
-    
-cluster_labels_array = np.array(cluster_labels)
-n_in_clusters = []
-n_in_clusteri = 0
-for i in range(range_n_clusters[0]):
-    n_in_clusteri = len(np.where(cluster_labels_array == i)[0])
-    n_in_clusters.append(n_in_clusteri)
-    print('The number of datapoints in cluster '+str(i)+' is: '+str(n_in_clusteri))
-    
 
-Month_Counter = MonthCounter(cluster_labels,n_clusters)
-Year_Counter = YearCounter(cluster_labels,n_clusters)
+data1 = SubDataStation
+clusterer = DBSCAN(eps=3, min_samples=4).fit(data1)
+cluster_labels = clusterer.labels_
+#silhouette_avg = silhouette_score(data1, cluster_labels)   
+#print("For n_clusters =", n_clusters, 
+#      "The average silhouette_score is :", silhouette_avg)
+#sample_silhouette_values = silhouette_samples(data1, cluster_labels)
 
-fig, axes = plt.subplots(nrows=2, ncols=2)
-ax0, ax1, ax2, ax3 = axes.flatten()
+n_clusters = len(set(cluster_labels)) - (1 if -1 in cluster_labels else 0)
+n_noise = list(cluster_labels).count(-1)
+print('The estimated number of clusters is:, ' ,str(n_clusters) )
+print('The estimated number of noisy datapoints is: ',str(n_noise))
 
+Start1 = datetime.date(2006,1,1)
+
+
+Month_Counter = MonthCounter(cluster_labels,n_clusters,Start1)
+Year_Counter = YearCounter(cluster_labels,n_clusters,Start1)
+
+
+
+fig, axes = plt.subplots(nrows=1, ncols=2)
+ax0, ax1 = axes.flatten()
 
 ax0.hist(Month_Counter, 12, density=True, histtype='bar')
-ax0.legend(prop={'size': 10})
 ax0.set_title('Divide in months')
 
 
 ax1.hist(Year_Counter, 10, density=True, histtype='bar')
-ax1.legend(prop={'size': 10})
 ax1.set_title('Divide in years')
 
 
-for var in range(7):
-#var = 0
-    M = []
-    for cl in range(n_clusters):
-        INDX = np.where(cluster_labels_array == cl)
-        M.append(Data[INDX,var,st, mdl, exp])
-    fig, axs = plt.subplots(7, 1)
-    axs.boxplot(M)
 
-plt.show()
