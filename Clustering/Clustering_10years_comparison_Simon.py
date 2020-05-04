@@ -26,15 +26,20 @@ def YearCounter(Labels,n_clusters,StartTime):
         Dag += datetime.timedelta(days = 1)
     return(Dat)
 
+def SeasonTable(Month_Counter):
+    print('Cluster'+len(Month_Counter)*'%5'))
+    for i in range(4):
+        A = []
+        for j in range(len(Month_Counter)):
+            A.append(Month_Counter[j].count(3*i)+Month_Counter[j].count(3*i+1)+Month_Counter[j].count(3*i+2))
+        
+        
+        
 Data = np.load('../Datares/tensor_daily_mean_5D.npy')
 NanINDX = np.argwhere(np.isnan(Data))
 for i in range(len(NanINDX)):
     Data[NanINDX[i][0],NanINDX[i][1],NanINDX[i][2],NanINDX[i][3],NanINDX[i][4]] = 200
-<<<<<<< HEAD
 
-
-=======
->>>>>>> 38c2fc8fcfc40b7206e31ca816f93d44eec34424
 st = 0
 STATIONS = ['Marsdiep Noord','Doove Balg West',
                 'Vliestroom','Doove Balg Oost',
@@ -115,21 +120,23 @@ for i in range(len(Month_Counter)):
 LAB = len(Month_Counter1)*['First 10 Years','Last 10 Years']
 
 
-fig, axes = plt.subplots(nrows=2, ncols=2)
-ax0, ax1, ax2, ax3 = axes.flatten()
-Col = [(0.1, 0.2, 0.5),(0.1, 0.5, 0.8),(0.3, 0.2, 0.5),(0.3, 0.5, 0.8),(0.5, 0.2, 0.5),(0.5, 0.5, 0.8),(0.7, 0.2, 0.5),(0.7, 0.5, 0.8)]
+fig, axes = plt.subplots(nrows=1, ncols=2,figsize = (15,8))
+ax0, ax1= axes.flatten()
+
 ax0.hist(Month_Counter, 12, density=True, histtype='bar')
-ax0.set_title('Divide in months')
+ax0.set_title('Cluster spread over months')
 
-ax2.hist(MC, 12, density=True, histtype='bar',label=LAB)
-ax2.set_title('Divide in months')
-ax2.legend(prop={'size': 10})
+ax1.hist(MC, 12, density=True, histtype='bar',label=LAB)
+ax1.set_title('Cluster spread over months in the first and last period')
+ax1.legend(prop={'size': 10})
 
-ax1.hist(Year_Counter, 10, density=True, histtype='bar',label=LAB)
-ax1.set_title('Divide in years')
+#ax1.hist(Year_Counter, 10, density=True, histtype='bar',label=LAB)
+#ax1.set_title('Cluster spread in years')
 
-ax3.hist(YC, 10, density=True, histtype='bar')
-ax3.set_title('Divide in years')
-ax3.legend(prop={'size': 10})
+#ax3.hist(YC, 10, density=True, histtype='bar')
+#ax3.set_title('Divide in years')
+#ax3.legend(prop={'size': 10})
 
+figname = 'CLUSTERING_first_cluster_then_devide_in_years_'+str(len(Month_Counter1))+'_clusters.png'
+fig.savefig(figname, bbox_inches='tight')
 

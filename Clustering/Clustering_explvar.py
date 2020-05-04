@@ -85,7 +85,7 @@ for i in range(SubData.shape[1]):
 
 SubDataStation = SubData[:,:,st] #Select the station that we are going to analyse
 
-range_n_clusters = [2]
+range_n_clusters = [3]
 
 for n_clusters in range_n_clusters:
     clusterer = KMeans(n_clusters=n_clusters, random_state=10).fit(SubDataStation)
@@ -150,12 +150,12 @@ for i in range(len(NanINDX)):
     Data[NanINDX[i][0],NanINDX[i][1],NanINDX[i][2],NanINDX[i][3],NanINDX[i][4]] = 200
 
 ## Plotting the variables in box plots of the different clusters 
-fig = plt.figure(3, figsize = (30,16))
+fig = plt.figure(3, figsize = (18,10))
 fig.suptitle('Paramater destribution per cluster',size = 'xx-large')
 LAB = ['cluster 1', 'cluster 2']
 for var in range(7):
 #var = 0
-    ax = fig.add_subplot(4, 2, var+1)
+    ax = fig.add_subplot(2, 4, var+1)
     ax.set_title(VARIABLES[var])
     M = []
     INDX = []
@@ -166,6 +166,13 @@ for var in range(7):
 #    M.append(Data[:,var,st, mdl, exp])
     ax.boxplot(M)
     plt.grid(True)
-fig.savefig('Clustering_exploring_variables_percluster.png', bbox_inches='tight')
+
+ax = fig.add_subplot(2,4,8)  
+leg = ['Cluster '+str(i+1) for i in range(range_n_clusters[0])] 
+ax.hist(Month_Counter ,12, label = leg, density=True, histtype='bar')
+ax.legend(prop={'size': 10})
+ax.set_title('Clustering distribution over the year')
+figname = 'Clustering_exploring_variables_percluster_'+str(range_n_clusters[0])+'_clusters.png'
+fig.savefig(figname, bbox_inches='tight')
 
 plt.show()
