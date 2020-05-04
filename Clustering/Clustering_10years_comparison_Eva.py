@@ -66,7 +66,7 @@ EXPERIMENTS = ['rcp45','rcp85']
 
 SubData = Data[:,:,:,mdl,exp]
 
-n_clusters = 2
+n_clusters = 3
 std = 1
 for i in range(SubData.shape[1]):
     SubData[:,i,:] = SubData[:,i,:]-SubData[:,i,:].mean()
