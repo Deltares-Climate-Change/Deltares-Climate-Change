@@ -1,16 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[23]:
-
-
-# Hyperparameters
-num_epochs = 5
-num_classes = 10
-batch_size = 100
-learning_rate = 0.001
-data = np.load('/Users/ceciliacasolo/Desktop/Data_CC/tensor_daily_mean_5D.npy')
-
 
 # In[22]:
 
@@ -24,41 +14,15 @@ import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
-
-# In[3]:
-
-
-import pytorch
-
-
-# In[3]:
-
-
-conda install pytorch torchvision -c pytorch
-
-
-# In[7]:
-
-
-pip install torch torchvision
-
+import xarray as xr
 
 # In[24]:
 
-
-# Hyperparameters
-num_epochs = 5
-num_classes = 10
-batch_size = 100
-learning_rate = 0.001
 data = np.load('/Users/ceciliacasolo/Desktop/Data_CC/tensor_daily_mean_5D.npy')
 
 
 # In[51]:
 
-
-import xarray as xr
 
 def data_to_xarray(data):
     """
@@ -87,9 +51,10 @@ stations = ['Marsdiep Noord','Doove Balg West',
                 'Zoutkamperlaag Zeegat','Zoutkamperlaag',
                 'Harlingen Havenmond West']
 model_input = 'CNRM-CERFACS-CNRM-CM5'
-model_output = 'ICHEC-EC-EARTH'
+model_output = 'IPSL-IPSL-CM5A-MR'
 variables = ["rsds","tas","uas","vas","clt","hurs","ps"]
-
+MODELS = ['CNRM-CERFACS-CNRM-CM5','ICHEC-EC-EARTH', 
+          'IPSL-IPSL-CM5A-MR','MOHC-HadGEM2-ES','MPI-M-MPI-ESM-LR']
 
 # In[45]:
 
@@ -155,7 +120,7 @@ print(net)
 
 
 K=1000
-lr=0.05
+learning_rate=0.01
 X_prime, Y_prime, xstds, ystds, xmeans, ymeans = normalize_data(X)
 train_x = torch.tensor(np.array(X_prime[:K,:]), dtype = torch.float32)
 train_y = torch.tensor(np.array(X_prime[:K,:]), dtype = torch.float32)
