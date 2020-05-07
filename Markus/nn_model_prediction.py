@@ -6,7 +6,7 @@ import seaborn as sns
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+from tensorboardX import SummaryWriter
 
 #Importing the Data
 data = np.load('Datares/tensor_daily_mean_5D.npy')
@@ -22,11 +22,13 @@ class Densenet(nn.Module):
     def __init__(self, inputsize, outputsize):
         super(Densenet, self).__init__()
         self.dense = nn.Sequential(
-                            nn.Linear(inputsize, 128),
+                            nn.Linear(inputsize, 256),
                             nn.ReLU(),
-                            nn.Linear(128, 256),
+                            nn.Linear(256, 512),
                             nn.ReLU(),
-                            nn.Linear(256, 256),
+                            nn.Linear(512, 512),
+                            nn.ReLU(),
+                            nn.Linear(512,256),
                             nn.ReLU(),
                             nn.Linear(256,outputsize))
 
@@ -62,31 +64,37 @@ def normalize_data(X):
 X_prime, Y_prime, xstds, ystds, xmeans, ymeans = normalize_data(X)
 
 #Splitting into Train and Test data
-X_train = torch.tensor(np.array(X_prime[:1000,:]), dtype = torch.float32)
-Y_train = torch.tensor(np.array(X_prime[:1000,:]), dtype = torch.float32)
+assert(torch.cuda.is_available()), 'GPU not available, aborting...'
 
-X_test = torch.tensor(np.array(X_prime[1000:,:]), dtype = torch.float32)
-Y_test = torch.tensor(np.array(X_prime[1000:,:]), dtype = torch.float32)
+t_size = 1000 #Size of training set
+
+X_train = torch.tensor(np.array(X_prime[:t_size,:]), dtype = torch.float32).cuda()
+Y_train = torch.tensor(np.array(Y_prime[:t_size,:]), dtype = torch.float32).cuda()
+
+X_test = torch.tensor(np.array(X_prime[t_size:,:]), dtype = torch.float32).cuda()
+Y_test = torch.tensor(np.array(Y_prime[t_size:,:]), dtype = torch.float32).cuda()
 
 
 #Training Loop
-net = Densenet(len(variables), len(variables))
-optimizer = torch.optim.Adam(net.parameters(), lr = 0.01)
+net = Densenet(len(variables), len(variables)).cuda()
+writer = SummaryWriter()
+optimizer = torch.optim.Adam(net.parameters(), lr = 0.001)
 
 
-for epoch in range(1000):
+for epoch in range(2000):
     optimizer.zero_grad()
-    batch_idx = np.random.randint(low = 0,high = 1000, size = 50)
+    batch_idx = np.random.randint(low = 0,high = t_size, size = 50)
     minibatch = X_train[batch_idx,:]
     output = net.forward(minibatch)
     loss = F.mse_loss(output, Y_train[batch_idx])
-    if (epoch % 200 == 0):
+    if (epoch % 100 == 99):
         print("Epoch: " + str(epoch))
         print("Loss: " + str(loss))
+        writer.add_scalar('Train/loss', loss.item(), epoch)
 
     loss.backward()
     optimizer.step()
-
+writer.close()
 
 train_error = F.mse_loss(net.forward(X_train), Y_train)
 test_error = F.mse_loss(net.forward(X_test), Y_test)
@@ -100,12 +108,12 @@ for sel_var in range(len(variables)):
     alpha = 0.01
     min_periods = 30
 
-    predictions = ((net.forward(X_test)[:,sel_var].detach().numpy()) * ystds[sel_var].values)+ ymeans[sel_var].values
+    predictions = ((net.forward(X_test)[:,sel_var].cpu().detach().numpy()) * ystds[sel_var].values)+ ymeans[sel_var].values
 
     ypred = pd.DataFrame(predictions).ewm(alpha = alpha, min_periods = min_periods).mean()
     ypred = np.array(ypred)[:,0]
 
-    ytrue = pd.DataFrame(Y_test[:,sel_var] * ystds[sel_var].values + ymeans[sel_var].values).ewm(alpha = alpha, adjust = True, min_periods = min_periods).mean()
+    ytrue = pd.DataFrame(Y_test[:,sel_var].cpu() * ystds[sel_var].values + ymeans[sel_var].values).ewm(alpha = alpha, adjust = True, min_periods = min_periods).mean()
     ytrue = np.array(ytrue)[:,0]
 
 
@@ -116,4 +124,10 @@ for sel_var in range(len(variables)):
     plt.legend()
 
 
-fig.suptitle('Predicting ' + models[0] + 'from the first 1000 days of ' + models[1] + '. Exponential Weighted Average Plot with smoothing factor ' + str(alpha) + '.', fontsize = 20)
+fig.suptitle('Predicting ' + model_output + ' from the first ' + str(t_size) +  ' days of ' + model_input + '. Exponential Weighted Average Plot with smoothing factor ' + str(alpha) + '.', fontsize = 20)
+
+
+#Explicitly plotting averaged temperature
+Y_pred = ((net.forward(X_test)[:,1].cpu().detach().numpy()) * ystds[1].values)+ ymeans[1].values
+pd.DataFrame({'y' : Y_pred}).ewm(alpha = 0.0001, min_periods= 2000).mean().plot()
+plt.title('Exponential weighted Average of predicted tas averaged over all time steps')
