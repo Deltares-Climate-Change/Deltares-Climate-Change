@@ -123,20 +123,16 @@ K=1000
 learning_rate=0.01
 X_prime, Y_prime, xstds, ystds, xmeans, ymeans = normalize_data(X)
 train_x = torch.tensor(np.array(X_prime[:K,:]), dtype = torch.float32)
-train_y = torch.tensor(np.array(X_prime[:K,:]), dtype = torch.float32)
+train_y = torch.tensor(np.array(Y_prime[:K,:]), dtype = torch.float32)
 test_x = torch.tensor(np.array(X_prime[(K+1):,:]), dtype = torch.float32)
-test_y = torch.tensor(np.array(X_prime[(K+1):,:]), dtype = torch.float32)
-
+test_y = torch.tensor(np.array(Y_prime[(K+1):,:]), dtype = torch.float32)
 
 # In[92]:
-
 
 # create a stochastic gradient descent optimizer
 optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate, momentum=0.9)
 
-
 # In[96]:
-
 
 # run the main training loop
 for epoch in range(K):
