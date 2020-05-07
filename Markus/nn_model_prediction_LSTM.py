@@ -58,6 +58,9 @@ def normalize_data(X):
 
 X_prime, Y_prime, xstds, ystds, xmeans, ymeans = normalize_data(X)
 
+
+
+
 X_prime = torch.from_numpy(np.array(X_prime, dtype = 'float32')).cuda()
 Y_prime = torch.from_numpy(np.array(Y_prime, dtype = 'float32')).cuda()
 
@@ -105,13 +108,13 @@ optimizer = torch.optim.Adam(lstm.parameters(), lr = 0.001)
 
 #in_seq, out_seq = seq_fetch(X_prime,Y_prime, treshold, seq_len)
 #encoded = lstm.encoder(in_seq)[0]
-#hidden_rep = encoded[-1,:,:].repeat(target.shape[0],1,1)
+#hidden_rep = encoded[-1,:,:].repeat(target.shape[0],
 #decoded, _ = lstma.decoder(hidden_rep)
 #lstma.dense(torch.flatten(decoded))
 
+writer = SummaryWriter()
 
-
-for epoch in range(10000):
+for epoch in range(100000):
     #Reset Gradients
     lstm.zero_grad()
 
@@ -123,6 +126,8 @@ for epoch in range(10000):
     loss = F.mse_loss(predictions.view(seq_len,1,7), out_seq)
     if(epoch % 500 == 0):
         print("LOSS " + str(loss.item()))
+    if(epoch% 10 == 0):
+        writer.add_scalar('Train/loss', loss.item(), epoch)
     loss.backward()
     optimizer.step()
 
@@ -133,14 +138,35 @@ test_in, test_out = seq_fetch(X_prime,Y_prime, treshold, seq_len)
 
 
 
-plt.plot(np.arange(seq_len),lstm(test_in).view(seq_len,1,7)[:,0,2].cpu().detach().numpy())
-plt.plot(np.arange(seq_len),test_out[:,0,2].cpu())
+plt.plot(np.arange(seq_len),lstm(test_in).view(seq_len,1,7)[:,0,1].cpu().detach().numpy())
+plt.plot(np.arange(seq_len),test_out[:,0,0].cpu())
+
+
+lstm(test_in).view(seq_len,1,7)[:,0,:].shape
+
+preds = np.empty((seq_len,len(variables)))
+
+for i in range(treshold,X_prime.shape[0]-seq_len,seq_len):
+    to_predict = torch.tensor(X_prime[i:i+30,:]).unsqueeze(1)
+    preds = np.vstack((preds,lstm(to_predict).view(seq_len,1,len(variables))[:,0,:].cpu().detach().numpy()))
+
+
+
+sel_var = 1
+
+preds_scaled = (preds[:,sel_var] * ystds[sel_var].values)+ ymeans[sel_var].values
+pd.DataFrame({'y' : preds_scaled}).ewm(alpha = 0.001).mean().plot()
 
 
 
 
 
+preds.shape
+Y_prime[treshold:,:].shape
 
+
+Y_prime.shape
+X_prime.shape
 
 """
 SIMULATION STUDY TO CHECK THE MODELS CAPACITY
