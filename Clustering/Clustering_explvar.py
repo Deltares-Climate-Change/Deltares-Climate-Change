@@ -189,7 +189,7 @@ for st in range(1):
                 for c in range(CLUSTERS[n_cl]):
                     A[c,0]= n_in_clusters[c]
                     for v in range(len(VARIABLES)):
-                        INDX = np.where(cluster_labels_array == cl)
+                        INDX = np.where(cluster_labels_array == c)
                         new = Data[INDX,v,st, mdl, exp]
                         A[c,2*v+1] = np.mean(new)
                         A[c,2*v+2] = np.std(new)
