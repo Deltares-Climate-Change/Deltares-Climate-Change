@@ -15,7 +15,10 @@ import matplotlib.pyplot as plt
 
 #We should unify the location and the name of our data, that would be the easiest way
 # to prevent pushing our own storage locations around. I propose one folder called Datares in the main directory
-data = np.load('/Users/ceciliacasolo/Desktop/Data_CC/tensor_daily_mean_5D.npy')
+data = np.load('../Datares/tensor_daily_mean_5D.npy')
+NanINDX = np.argwhere(np.isnan(data))
+for i in range(len(NanINDX)):
+    data[NanINDX[i][0],NanINDX[i][1],NanINDX[i][2],NanINDX[i][3],NanINDX[i][4]] = 200
 c=xr.DataArray(data)
 darr = da.from_array(data, chunks=(33238,7,10,5,2))
 
@@ -28,7 +31,8 @@ stations=['Marsdiep Noord','Doove Balg West',
                 'Blauwe Slenk Oost','Harlingen Voorhaven','Dantziggat',
                 'Zoutkamperlaag Zeegat','Zoutkamperlaag',
                 'Harlingen Havenmond West']
-driving_models=['CNRM-CERFACS-CNRM-CM5','ICHEC-EC-EARTH', 'IPSL-IPSL-CM5A-MR','MOHC-HadGEM2-ES','MPI-M-MPI-ESM-LR']
+driving_models=['CNRM-CERFACS-CNRM-CM5','ICHEC-EC-EARTH', 
+          'IPSL-IPSL-CM5A-MR','MOHC-HadGEM2-ES','MPI-M-MPI-ESM-LR']
 temp = xr.DataArray(data, coords=[dates,variables,stations,driving_models,experiments], dims=['time', 'var', 'station','model','exp'])
 stations_numbers=[1,2,3,4,5,6,7,8,9,10]
 temp_station_numbers= xr.DataArray(data, coords=[dates,variables,stations_numbers,driving_models,experiments], dims=['time', 'var', 'station','model','exp'])
@@ -50,6 +54,6 @@ data_type1=temp.sel(var='ps',station='Marsdiep Noord',exp='rcp45',model='CNRM-CE
 
 #variables corresponding to the different stations given a SPECIFIC DATE
 #pretty irrelevant
-data_type2=temp_station_numbers.sel(var='ps',time='2107-01-01',exp='rcp45',model='CNRM-CERFACS-CNRM-CM5')
+data_type2=temp_station_numbers.sel(var='ps',time='2017-01-01',exp='rcp45',model='CNRM-CERFACS-CNRM-CM5')
 plt.figure()
 data_type2.plot()
