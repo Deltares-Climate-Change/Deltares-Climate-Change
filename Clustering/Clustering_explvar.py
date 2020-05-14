@@ -75,10 +75,10 @@ VARIABLES = ['Surface Downwelling Shortwave Radiation',
 exp = 0
 EXPERIMENTS = ['rcp45','rcp85']
 
-CLUSTERS = [2,3,4,8]
+CLUSTERS = [4]
 
-for st in range(1):
-    for mdl in range(len(MODELS)):
+for st in range(10):
+    for mdl in range(2,4):
         for exp in range(len(EXPERIMENTS)):
             for n_cl in range(len(CLUSTERS)):  
                 SubData = Data[:,:,:,mdl,exp]
