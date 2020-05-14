@@ -87,11 +87,31 @@ MODELS = ['CNRM-CERFACS-CNRM-CM5','ICHEC-EC-EARTH',
 exp = 0
 EXPERIMENTS = ['rcp45','rcp85']
 
-#predict 'rsds' by other variables
+#predict relation between temperature and the other variables
 
-D=X.sel(var=variables[1:len(variables)],station='Marsdiep Noord',model='CNRM-CERFACS-CNRM-CM5',exp='rcp45')
-y=X.sel(var=variables[0],station='Marsdiep Noord',model='CNRM-CERFACS-CNRM-CM5',exp='rcp45')
+D=X.sel(var=["rsds","uas","vas","clt","hurs","ps"],station='Marsdiep Noord',model='CNRM-CERFACS-CNRM-CM5',exp='rcp45')
+Q=np.array(D)
+y=X.sel(var="tas",station='Marsdiep Noord',model='CNRM-CERFACS-CNRM-CM5',exp='rcp45')
+D = sm.add_constant(D) #adds possible constant to the linear relation
 model = sm.OLS(np.array(y), np.array(D)).fit()
+beta = model.params
 #predictions = model.predict(X)
 
-model.summary()
+print(model.summary())
+
+
+def f(v,beta):
+    t = beta[0]+sum(v[:]*beta[1:len(beta)])
+    return t
+
+temp_predicted = np.zeros(len(y))
+for i in range(len(y)):
+    temp_predicted[i] = f(Q[i,:],beta)
+
+fig = plt.figure()    
+tdata = plt.plot(y,label='T from data')
+tregr = plt.plot(temp_predicted,label='Predicted T from multi linear regression')
+plt.xlabel('time (days)')
+plt.ylabel('temperature (Celcius)')
+plt.legend((tdata,tregr), ('T from data','Predicted T from multi linear regression'))
+plt.show()
