@@ -46,43 +46,43 @@ VARIABLES = ['Surface Downwelling Shortwave Radiation',
 
 EXPERIMENTS = ['rcp45','rcp85']
 
-CLUSTERS = [2,3,4,8]
+CLUSTERS = [4]
 
 
 st = 0
 
-
-for n_cl in range(len(CLUSTERS)):
-
-    ClusRng = list(range(CLUSTERS[n_cl]))
-    fig = plt.figure(figsize = (20,15))
-    for mdl in range(len(MODELS)):
-        Filename = 'ClusExpVar_'+STATIONS[st]+'_'+MODELS[mdl]+'_'+EXPERIMENTS[0]+'_'+str(CLUSTERS[n_cl])+'_clusters.npy'
-        A = np.load(Filename)
-        Filename = 'ClusExpVar_'+STATIONS[st]+'_'+MODELS[mdl]+'_'+EXPERIMENTS[1]+'_'+str(CLUSTERS[n_cl])+'_clusters.npy'
-        B = np.load(Filename)
-        
-        for var in range(len(VARIABLES)):
-            idxA = np.flip(np.argsort(A[:,2*var]))
-            idxB = np.flip(np.argsort(B[:,2*var]))
-            
-            ax0 = fig.add_subplot(4, 4, 2*var+1)
-            ax1 = fig.add_subplot(4, 4, 2*var+2)
-            
-            #ax0.errorbar(ClusRng,A[:,2*var+1][idxA],yerr= A[:,2*var+2][idxA], fmt='o',label = MODELS[mdl])
-            #ax1.errorbar(ClusRng,B[:,2*var+][idxB],yerr= B[:,2*var+2][idxB], fmt='o',label = MODELS[mdl])
-            
-            ax0.errorbar(ClusRng,A[:,2*var][idxA], fmt='-o',label = MODELS[mdl])
-            ax1.errorbar(ClusRng,B[:,2*var][idxB], fmt='-o',label = MODELS[mdl])
-
-            ax0.set_title(VARIABLES[var]+' '+EXPERIMENTS[0])
-            ax1.set_title(VARIABLES[var]+' '+EXPERIMENTS[1])
+for st in range(len(STATIONS)):
+    for n_cl in range(len(CLUSTERS)):
     
-    handles, labels = ax1.get_legend_handles_labels()
-    fig.legend(handles, labels)
-              
-    fig.show()
-    figname = 'ClusExpVar_Compare_models_with_station_'+STATIONS[st]+'_'+str(CLUSTERS[n_cl])+'_clusters.png'
-    fig.savefig(figname, bbox_inches='tight')
+        ClusRng = list(range(CLUSTERS[n_cl]))
+        fig = plt.figure(figsize = (20,15))
+        for mdl in range(len(MODELS)):
+            Filename = 'ClusExpVar_'+STATIONS[st]+'_'+MODELS[mdl]+'_'+EXPERIMENTS[0]+'_'+str(CLUSTERS[n_cl])+'_clusters.npy'
+            A = np.load(Filename)
+            Filename = 'ClusExpVar_'+STATIONS[st]+'_'+MODELS[mdl]+'_'+EXPERIMENTS[1]+'_'+str(CLUSTERS[n_cl])+'_clusters.npy'
+            B = np.load(Filename)
+            
+            for var in range(len(VARIABLES)):
+                idxA = np.flip(np.argsort(A[:,2*var]))
+                idxB = np.flip(np.argsort(B[:,2*var]))
+                
+                ax0 = fig.add_subplot(4, 4, 2*var+1)
+                ax1 = fig.add_subplot(4, 4, 2*var+2)
+                
+                #ax0.errorbar(ClusRng,A[:,2*var+1][idxA],yerr= A[:,2*var+2][idxA], fmt='o',label = MODELS[mdl])
+                #ax1.errorbar(ClusRng,B[:,2*var+][idxB],yerr= B[:,2*var+2][idxB], fmt='o',label = MODELS[mdl])
+                
+                ax0.errorbar(ClusRng,A[:,2*var][idxA], fmt='-o',label = MODELS[mdl])
+                ax1.errorbar(ClusRng,B[:,2*var][idxB], fmt='-o',label = MODELS[mdl])
+    
+                ax0.set_title(VARIABLES[var]+' '+EXPERIMENTS[0])
+                ax1.set_title(VARIABLES[var]+' '+EXPERIMENTS[1])
+        
+        handles, labels = ax1.get_legend_handles_labels()
+        fig.legend(handles, labels)
+                  
+        fig.show()
+        figname = 'ClusExpVar_Compare_models_with_station_'+STATIONS[st]+'_'+str(CLUSTERS[n_cl])+'_clusters.png'
+        fig.savefig(figname, bbox_inches='tight')
 
 
