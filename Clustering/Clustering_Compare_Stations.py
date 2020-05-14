@@ -11,6 +11,9 @@ import numpy as np
 import matplotlib.pyplot as plt 
 from math import ceil
 import seaborn as sns
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
+
 
 def MonthCounter(Labels,n_clusters):
     Dat = [[] for i in range(n_clusters)]
@@ -27,6 +30,24 @@ def YearCounter(Labels,n_clusters):
         Dat[Labels[i]].append(Dag.year)
         Dag += datetime.timedelta(days = 1)
     return(Dat)
+
+def plotpt(ax, extent=(4.2,6.6,52.8,53.7), **kwargs):
+    ax.plot(C2,C1, 'r*', ms=20, **kwargs)
+    for i in range(len(coordinates)):
+        if i == 9:
+            H_al = 'left'
+        else:
+            H_al = 'right'
+        plt.text(coordinates[i][1], coordinates[i][0], STATIONS[i],
+                 horizontalalignment=H_al,
+                 verticalalignment = 'bottom',
+                 transform=ccrs.Geodetic())
+    ax.set_extent(extent)
+    ax.coastlines(resolution='10m')
+    ax.gridlines(draw_labels=True)
+    ax.xaxis.set_ticks_position('bottom')
+    ax.yaxis.set_ticks_position('left')
+
 
 Data = np.load('../Datares/tensor_daily_mean_5D.npy')
 NanINDX = np.argwhere(np.isnan(Data))
@@ -51,6 +72,13 @@ STATIONS = ['Marsdiep Noord','Doove Balg West',
 8 'Zoutkamperlaag',
 9 'Harlingen Havenmond West'
 """
+
+
+coordinates = [[52.9836220,4.7502700],[53.0539960,5.0326430],[53.3144720,5.1603010],[53.0854860,5.2876310],[53.2256720,5.2783220],[53.1742859,5.4059014],[53.4022720,5.7274630],[53.4762460,6.0797620],[53.4305470,6.1331940],[53.1769800,5.3969300]]
+
+C1 = [coordinates[i][0] for i in range(len(coordinates))]
+C2 = [coordinates[i][1] for i in range(len(coordinates))]
+
 
 MODELS = ['CNRM-CERFACS-CNRM-CM5','ICHEC-EC-EARTH', 
           'IPSL-IPSL-CM5A-MR','MOHC-HadGEM2-ES','MPI-M-MPI-ESM-LR']
@@ -119,18 +147,17 @@ for mdl in range(len(MODELS)):
             
         figname = 'CompareStations'+MODELS[mdl]+'_'+EXPERIMENTS[exp]+'.png'
         fig.savefig(figname, bbox_inches='tight')
-        plt.close()
         plt.show()
-
+        plt.close()
 
 for mdl in range(4):
     fig = plt.figure(figsize=(30,16))
     D1 = np.zeros((len(STATIONS),4,len(VARIABLES)))
     D2 = np.zeros((len(STATIONS),4,len(VARIABLES)))
     for st in range(len(STATIONS)):
-        Filename = 'ClusExpVar_'+STATIONS[st]+'_'+MODELS[mdl]+'_'+EXPERIMENTS[0]+'_'+str(CLUSTERS[n_cl])+'_clusters.npy'
+        Filename = 'ClusExpVar_'+STATIONS[st]+'_'+MODELS[mdl]+'_'+EXPERIMENTS[0]+'_4_clusters.npy'
         A = np.load(Filename)
-        Filename = 'ClusExpVar_'+STATIONS[st]+'_'+MODELS[mdl]+'_'+EXPERIMENTS[1]+'_'+str(CLUSTERS[n_cl])+'_clusters.npy'
+        Filename = 'ClusExpVar_'+STATIONS[st]+'_'+MODELS[mdl]+'_'+EXPERIMENTS[1]+'_4_clusters.npy'
         B = np.load(Filename)
         for var in range(len(VARIABLES)):
             idxA = np.flip(np.argsort(A[:,2*var+1]))
@@ -149,11 +176,13 @@ for mdl in range(4):
             yticks = STATIONS
         else:
             yticks = False
-        sns.heatmap(D1[:,:,var],annot=True, xticklabels = False, yticklabels = yticks, ax = ax1,linewidths=.5,cbar = False)
-        sns.heatmap(D2[:,:,var],annot=True, xticklabels = False, yticklabels = False, ax = ax2,linewidths=.5,cbar = False)
+        sns.heatmap(D1[:,:,var],annot=True, xticklabels = False, yticklabels = yticks, ax = ax1,linewidths=.5,cbar = False,fmt='g')
+        sns.heatmap(D2[:,:,var],annot=True, xticklabels = False, yticklabels = False, ax = ax2,linewidths=.5,cbar = False,fmt='g')
         ax1.set_title(VARIABLES[var]+' '+EXPERIMENTS[0])
         ax2.set_title(VARIABLES[var]+' '+EXPERIMENTS[1])
-
+        
+    ax = plt.subplot(428, projection=ccrs.Mercator())
+    plotpt(ax, transform=ccrs.PlateCarree())
     plt.show()
     figname = 'ClusExpVar_tableCompare_models_with_model_'+MODELS[mdl]+'_.png'
     fig.savefig(figname, bbox_inches='tight')
