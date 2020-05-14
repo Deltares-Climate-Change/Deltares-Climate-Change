@@ -17,21 +17,6 @@ stations = np.array(X.coords['station'])
 variables = np.array(X.coords['var'])
 
 
-#class LSTMTranslator(nn.Module):
-#    def __init__(self, vars_dim, hidden_dim):
-#        super(LSTMTranslator, self).__init__()
-#        self.hidden_dim = hidden_dim
-#        self.vars_dim = vars_dim
-#
-#        self.encoder = nn.LSTM(vars_dim,hidden_dim)
-#        self.decoder = nn.LSTM(vars_dim,hidden_dim)
-#
-#
-#    def forward(self, x):
-#        encoded, _ = self.encoder(x)
-#
-
-
 #Preprocessing
 model_input = models[1]
 model_output = models[2]
@@ -138,19 +123,18 @@ for epoch in range(50000):
 
 
 
-
-
 #test_in, test_out = seq_fetch(X_prime,Y_prime, treshold, seq_len,1)
 #plt.plot(np.arange(seq_len),lstm(test_in).view(seq_len,1,7)[:,0,1].cpu().detach().numpy())
 #plt.plot(np.arange(seq_len),test_out[:,0,1].cpu().numpy())
-
-
-
-preds = np.empty((seq_len,len(variables)))
+#preds = np.empty((seq_len,len(variables)))
 
 for i in range(treshold,X_prime.shape[0]-seq_len,seq_len):
-    to_predict = torch.tensor(X_prime[i:i+seq_len,:]).unsqueeze(1)
-    preds = np.vstack((preds,lstm(to_predict).view(seq_len,1,len(variables))[:,0,:].cpu().detach().numpy()))
+    if (i == treshold):
+        to_predict = torch.tensor(X_prime[i:i+seq_len,:]).unsqueeze(1)
+        preds = lstm(to_predict).view(seq_len,1,len(variables))[:,0,:].cpu().detach().numpy()
+    else:
+        to_predict = torch.tensor(X_prime[i:i+seq_len,:]).unsqueeze(1)
+        preds = np.vstack((preds,lstm(to_predict).view(seq_len,1,len(variables))[:,0,:].cpu().detach().numpy()))
 
 
 
@@ -176,61 +160,19 @@ for sel_var in range(len(variables)):
     plt.legend()
 
 
-#plt.savefig('LSTMpreds.pdf')
-#preds.shape
-#Y_prime[treshold:,:].shape
-
-
-#Y_prime.shape
-#X_prime.shape
-
-"""
-SIMULATION STUDY TO CHECK THE MODELS CAPACITY
-
-#autoenc = nn.LSTM(7,100)
-#target = torch.randint(0,10,(10,1), dtype = torch.float32, requires_grad = True).unsqueeze(1) #10 'words' with representational size 1 i.e. one number one word
-lstma = LSTMAutoencoder(7,100, seq_len)
-optimizer = torch.optim.SGD(lstma.parameters(), lr = 0.1)
-target = torch.randn(seq_len,1,7)
-
-encoded = lstma.encoder(target)[0]
-hidden_rep = encoded[-1,:,:].repeat(target.shape[0],1,1)
-decoded, _ = lstma.decoder(hidden_rep)
-lstma.dense(torch.flatten(decoded))
-
-
-for epoch in range(50):
-    #Reset Gradients
-    optimizer.zero_grad()
-
-    predictions = lstma.forward(target)
-    loss = F.mse_loss(predictions.view(seq_len,1,7), target)
-    print("LOSS " + str(loss.item()))
-    loss.backward()
-    optimizer.step()
-"""
-
-
-sel_var = 0
-
-nobs = 5000
-xrange = treshold + np.arange(nobs)
-xdates = X['time'][xrange]
-
-preds_scaled = (preds[:,sel_var] * ystds[sel_var].values)+ ymeans[sel_var].values
-ytrue = ((Y_prime[:,sel_var].cpu().numpy()) * np.array(ystds[sel_var]) + np.array(ymeans[sel_var]))
-
-fig, ax = plt.subplots(figsize = (20,10))
-plt.plot(xdates,preds_scaled[:nobs])
-plt.plot(xdates,ytrue[100:nobs+100])
-fig.autofmt_xdate()
 
 
 
-
+#Saving predictions for visualizing later
 for i in range(7):
     if (i == 0):
-        lstm_preds = preds_scaled = (preds[:,i] * ystds[i].values)+ ymeans[i].values
+        lstm_preds = (preds[:,i] * ystds[i].values)+ ymeans[i].values
+        ytrue = ((Y_prime[:,i].cpu().numpy()) * np.array(ystds[i]) + np.array(ymeans[i]))
     else:
         preds_scaled = (preds[:,i] * ystds[i].values)+ ymeans[i].values
         lstm_preds = np.vstack((lstm_preds, preds_scaled))
+        ytrue = np.vstack((ytrue, ((Y_prime[:,i].cpu().numpy()) * np.array(ystds[i]) + np.array(ymeans[i]))))
+
+
+#np.save('lstm_preds.npy', lstm_preds)
+np.save('ytrue10k', ytrue[:,treshold:])
