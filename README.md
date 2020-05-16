@@ -1,7 +1,7 @@
 # Deltares-Climate-Change
 
 <p align="center">
-  <img width="300" height="300" src="heatmap.png">
+  <img width="420" height="600" src="groupearthcover.png">
 </p>
 
 
