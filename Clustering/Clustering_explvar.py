@@ -78,7 +78,7 @@ EXPERIMENTS = ['rcp45','rcp85']
 CLUSTERS = [4]
 
 for st in range(10):
-    for mdl in range(3,4):
+    for mdl in range(4,5):
         for exp in range(len(EXPERIMENTS)):
             for n_cl in range(len(CLUSTERS)):  
                 SubData = Data[:,:,:,mdl,exp]

@@ -77,7 +77,7 @@ for var in range(len(VARIABLES)):
             D2[st,mdl] = -np.mean(SubData[:3650,1])+np.mean(SubData[3650:,1])
 
 
-    fig = plt.figure(figsize=(10,5))
+    fig = plt.figure(figsize=(15,5))
     ax1 = fig.add_subplot(121)
     ax2 = fig.add_subplot(122)
     sns.heatmap(D1[:,:],annot=True, xticklabels = MODELS, yticklabels = STATIONS, ax = ax1,linewidths=.5,cbar = False,fmt='g')
