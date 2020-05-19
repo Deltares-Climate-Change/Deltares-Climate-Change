@@ -208,7 +208,7 @@ newvars=xr.concat([var1, var2, var3, var4, var5, var6], 'var').transpose()
 k = 10
 training = 6000
 
-nbrs = NearestNeighbors(n_neighbors=k, algorithm='ball_tree').fit(newvars[:training])
+nbrs = NearestNeighbors(n_neighbors=k, algorithm='auto').fit(newvars[:training])
 distances, indices = nbrs.kneighbors(newvars[training:])
 
 pred=np.zeros(33238)
