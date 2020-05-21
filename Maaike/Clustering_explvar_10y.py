@@ -179,6 +179,9 @@ Data = np.load('../Datares/tensor_daily_mean_5D.npy')
 NanINDX = np.argwhere(np.isnan(Data))
 for i in range(len(NanINDX)):
     Data[NanINDX[i][0],NanINDX[i][1],NanINDX[i][2],NanINDX[i][3],NanINDX[i][4]] = 200
+Data = Data[:,:,st,mdl,exp]
+Data1 = Data[0:3650,:]
+Data2 = Data[-3650:,:]
     
 #plotting the clusters of both timeslots over a year   
 fig, axes = plt.subplots(nrows=1, ncols=2)
@@ -194,8 +197,10 @@ ax1.set_title('Divide in months')
 #Create all the boxplots for the different variables and clusters
 fig = plt.figure(2, figsize = (20,10))
 #Suptitle = 'Distribution: '+ STATIONS[st]+', '+MODELS[mdl]+', '+EXPERIMENTS[exp]+', '+str(n_clusters)+' clusters'
-fig.suptitle(Suptitle,size = 'xx-large')
-xlabel = ["'06-'16","'86-'96"]*n_clusters
+#fig.suptitle(Suptitle,size = 'xx-large')
+xlabel_long = ["'06-'16 I","'86-'96 I","'06-'16 II","'86-'96 II",
+               "'06-'16 III","'86-'96 III","'06-'16 IV","'86-'96 IV",]
+xlabel = xlabel_long[:n_clusters*2]
 for var in range(7):
     ax = fig.add_subplot(2, 4, var+1)
     ax.set_title(VARIABLES[var])
@@ -207,8 +212,8 @@ for var in range(7):
         cl2 = order_lst2[cl]
         INDX1 = np.where(cluster_labels_array1 == cl1)
         INDX2 = np.where(cluster_labels_array2 == cl2)
-        new1 = Data[INDX1,var,st, mdl, exp]
-        new2 = Data[INDX2,var,st, mdl, exp]
+        new1 = Data1[INDX1,var]
+        new2 = Data2[INDX2,var]
         M.append(new1[0])
 #        xlabel.append(str(cl+1)+'a')
         M.append(new2[0])
@@ -221,7 +226,7 @@ for var in range(7):
 ax = fig.add_subplot(2,4,8)  
 #leg = ['Cluster 1a','Cluster 1b','Cluster 2a','Cluster 2b']
 #       'Cluster 3a','Cluster 3b','Cluster 3a','Cluster 3b',] 
-leg = ["'06-'16","'86-'96"]*n_clusters
+leg = xlabel
 ax.hist(Month_Counter ,12, label=leg, density=True, histtype='bar', color=color[0:n_clusters*2])
 ax.legend(prop={'size': 10},ncol=2)
 ax.set_title('Clustering distribution over the year')
