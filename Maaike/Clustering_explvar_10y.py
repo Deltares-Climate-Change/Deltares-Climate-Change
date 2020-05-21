@@ -67,7 +67,7 @@ for i in range(len(NanINDX)):
     Data[NanINDX[i][0],NanINDX[i][1],NanINDX[i][2],NanINDX[i][3],NanINDX[i][4]] = 200
 
 
-st = 0
+st = 9
 STATIONS = ['Marsdiep Noord','Doove Balg West',
                 'Vliestroom','Doove Balg Oost',
                 'Blauwe Slenk Oost','Harlingen Voorhaven','Dantziggat',
@@ -105,7 +105,7 @@ VARIABLES = ['Surface Downwelling Shortwave Radiation',
              'Near-surface relative humidity',
              'Surface pressure']
 
-exp = 1
+exp = 0
 EXPERIMENTS = ['rcp45','rcp85']
 
 n_clusters = 2
@@ -230,7 +230,8 @@ leg = xlabel
 ax.hist(Month_Counter ,12, label=leg, density=True, histtype='bar', color=color[0:n_clusters*2])
 ax.legend(prop={'size': 10},ncol=2)
 ax.set_title('Clustering distribution over the year')
-figname = 'ClusExpVar_'+STATIONS[st]+'_'+MODELS[mdl]+'_'+EXPERIMENTS[exp]+'_'+str(n_clusters)+'_clusters.png'
+#figname = 'ClusExpVar_'+STATIONS[st]+'_'+MODELS[mdl]+'_'+EXPERIMENTS[exp]+'_'+str(n_clusters)+'_clusters.png'
+figname = 'figure_for_Simon_2_exp45'
 fig.savefig(figname, bbox_inches='tight')
 
 plt.show()
