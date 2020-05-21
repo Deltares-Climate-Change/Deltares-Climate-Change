@@ -48,7 +48,7 @@ STATIONS = ['Marsdiep Noord','Doove Balg West',
 9 'Harlingen Havenmond West'
 """
 
-mdl = 3
+mdl = 4
 MODELS = ['CNRM-CERFACS-CNRM-CM5','ICHEC-EC-EARTH', 
           'IPSL-IPSL-CM5A-MR','MOHC-HadGEM2-ES','MPI-M-MPI-ESM-LR']
 """
@@ -58,7 +58,7 @@ MODELS = ['CNRM-CERFACS-CNRM-CM5','ICHEC-EC-EARTH',
 3 'MOHC-HadGEM2-ES'
 4 'MPI-M-MPI-ESM-LR'
 """
-exp = 0
+exp = 1
 EXPERIMENTS = ['rcp45','rcp85']
 
 SubData = Data[:,:,:,mdl,exp]
