@@ -197,11 +197,11 @@ variables = ["rsds","tas","uas","vas","clt","hurs","ps"]
 #Variables
 var1 = X.sel(var='hurs',station= 'Marsdiep Noord' ,exp= 'rcp45', model= 'CNRM-CERFACS-CNRM-CM5')
 var2 = X.sel(var='ps',station= 'Marsdiep Noord' ,exp= 'rcp45', model= 'CNRM-CERFACS-CNRM-CM5')
-var3 = X.sel(var='rsds',station= 'Marsdiep Noord' ,exp= 'rcp45', model= 'CNRM-CERFACS-CNRM-CM5')
+var3 = X.sel(var='tas',station= 'Marsdiep Noord' ,exp= 'rcp45', model= 'CNRM-CERFACS-CNRM-CM5')
 var4 = X.sel(var='uas',station= 'Marsdiep Noord' ,exp= 'rcp45', model= 'CNRM-CERFACS-CNRM-CM5')
 var5 = X.sel(var='vas',station= 'Marsdiep Noord' ,exp= 'rcp45', model= 'CNRM-CERFACS-CNRM-CM5')
 var6 = X.sel(var='clt',station= 'Marsdiep Noord' ,exp= 'rcp45', model= 'CNRM-CERFACS-CNRM-CM5')
-var7 = X.sel(var='tas',station= 'Marsdiep Noord' ,exp= 'rcp45', model= 'CNRM-CERFACS-CNRM-CM5')
+var7 = X.sel(var='rsds',station= 'Marsdiep Noord' ,exp= 'rcp45', model= 'CNRM-CERFACS-CNRM-CM5')
 
 newvars=xr.concat([var1, var2, var3, var4, var5, var6], 'var').transpose()
 
@@ -246,12 +246,15 @@ dates= pd.date_range(start="2006-01-01",end="2096-12-31")
 pred = xr.DataArray(pred, coords=[dates], dims=['time'])
 pred2=pred.to_pandas()
 var7=var7.to_pandas()
-pred2.ewm(alpha=0.05,min_periods= 2000).mean().plot(figsize=(15, 10))
+pred2.ewm(alpha=0.05,min_periods= 2000).mean().plot(figsize=(15, 10),label='Real Values')
 var7.ewm(alpha=0.05,min_periods= 2000).mean().plot(figsize=(15, 10))
 
 
-
-
+fig = plt.figure(figsize=(20,10))
+ax = plt.subplot(111)
+ax.plot(pred2.ewm(alpha=0.05,min_periods= 2000).mean(),label="Prediction temperature")
+ax.plot(var7.ewm(alpha=0.05,min_periods= 2000).mean(),label="Temperature")
+ax.legend()
 
 
 
