@@ -27,7 +27,7 @@ def YearCounter(Labels,n_clusters,StartTime):
     return(Dat)
 
 def SeasonTable(Month_Counter):
-    print('Cluster'+len(Month_Counter)*'%5'))
+    #print('Cluster'+len(Month_Counter)*'%5'))
     for i in range(4):
         A = []
         for j in range(len(Month_Counter)):
@@ -69,12 +69,12 @@ MODELS = ['CNRM-CERFACS-CNRM-CM5','ICHEC-EC-EARTH',
 3 'MOHC-HadGEM2-ES'
 4 'MPI-M-MPI-ESM-LR'
 """
-exp = 0
+exp = 1
 EXPERIMENTS = ['rcp45','rcp85']
 
 SubData = Data[:,:,:,mdl,exp]
 
-std = 1
+std = 3
 
 for i in range(SubData.shape[1]):
     SubData[:,i,:] = SubData[:,i,:]-SubData[:,i,:].mean()
@@ -82,7 +82,7 @@ for i in range(SubData.shape[1]):
 
 SubDataStation = SubData[:,:,st] #Select the station that we are going to analyse
 
-range_n_clusters = [4]
+range_n_clusters = [2]
 
 for n_clusters in range_n_clusters:
     data1 = SubDataStation
@@ -124,10 +124,11 @@ fig, axes = plt.subplots(nrows=1, ncols=2,figsize = (15,8))
 ax0, ax1= axes.flatten()
 
 ax0.hist(Month_Counter, 12, density=True, histtype='bar')
-ax0.set_title('Cluster spread over months')
+#ax0.set_title('Cluster spread over months')
 
-ax1.hist(MC, 12, density=True, histtype='bar',label=LAB)
-ax1.set_title('Cluster spread over months in the first and last period')
+ax1.hist(MC, 12, density=True, histtype='bar',label=LAB, color=['lightsteelblue','blue','lightsalmon','red'])
+#ax1.set_title('Cluster spread over months in the first and last period')
+
 ax1.legend(prop={'size': 10})
 
 #ax1.hist(Year_Counter, 10, density=True, histtype='bar',label=LAB)
@@ -137,6 +138,6 @@ ax1.legend(prop={'size': 10})
 #ax3.set_title('Divide in years')
 #ax3.legend(prop={'size': 10})
 
-figname = 'CLUSTERING_first_cluster_then_devide_in_years_'+str(len(Month_Counter1))+'_clusters.png'
-fig.savefig(figname, bbox_inches='tight')
+#figname = 'CLUSTERING_first_cluster_then_devide_in_years_'+str(len(Month_Counter1))+'_clusters.png'
+#fig.savefig(figname, bbox_inches='tight')
 

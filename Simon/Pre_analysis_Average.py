@@ -80,8 +80,8 @@ for var in range(len(VARIABLES)):
     fig = plt.figure(figsize=(15,5))
     ax1 = fig.add_subplot(121)
     ax2 = fig.add_subplot(122)
-    sns.heatmap(D1[:,:],annot=True, xticklabels = MODELS, yticklabels = STATIONS, ax = ax1,linewidths=.5,cbar = False,fmt='g')
-    sns.heatmap(D2[:,:],annot=True, xticklabels = MODELS, yticklabels = False, ax = ax2,linewidths=.5,cbar = False,fmt='g')
+    sns.heatmap(D1[:,:],annot=False, xticklabels = MODELS, yticklabels = STATIONS, ax = ax1,linewidths=.5,cbar = True,fmt='g')
+    sns.heatmap(D2[:,:],annot=False, xticklabels = MODELS, yticklabels = False, ax = ax2,linewidths=.5,cbar = True,fmt='g')
     ax1.set_title(VARIABLES[var]+' '+EXPERIMENTS[0])
     ax2.set_title(VARIABLES[var]+' '+EXPERIMENTS[1])
     
