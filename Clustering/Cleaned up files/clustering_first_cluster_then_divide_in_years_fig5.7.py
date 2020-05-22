@@ -29,7 +29,7 @@ for i in range(len(NanINDX)):
 
 #select model, experiment and corresponding data
 mdl = 0
-exp = 1
+exp = 0
 SubData = Data[:,:,:,mdl,exp]
 
 #standardize data
