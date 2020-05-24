@@ -2,8 +2,14 @@
 """
 Created on Thu Apr 23 09:56:56 2020
 
-@author: simon
+@author: Simon
+
+This file forms the basic template for comparing the first and the last period of
+the dataset, upon which the others are based. It takes the desired station, model
+and experiment as input, and clusters the first and last 10 years, and compares
+the results in a plot which shows the spread of the clusters during the years.
 """
+
 import datetime
 import numpy as np
 import matplotlib.pyplot as plt 
@@ -26,10 +32,14 @@ def YearCounter(Labels,n_clusters):
         Dag += datetime.timedelta(days = 1)
     return(Dat)
 
+#load the data and remove the NaN entries
 Data = np.load('../Datares/tensor_daily_mean_5D.npy')
 NanINDX = np.argwhere(np.isnan(Data))
 for i in range(len(NanINDX)):
     Data[NanINDX[i]] = 200
+
+
+#Select the station, model, and experiment  
 st = 0
 STATIONS = ['Marsdiep Noord','Doove Balg West',
                 'Vliestroom','Doove Balg Oost',
@@ -62,57 +72,62 @@ MODELS = ['CNRM-CERFACS-CNRM-CM5','ICHEC-EC-EARTH',
 exp = 0
 EXPERIMENTS = ['rcp45','rcp85']
 
+
+#Select the desired data, and normalize the datapoints
 SubData = Data[:,:,:,mdl,exp]
-
-std = 1
-
 for i in range(SubData.shape[1]):
     SubData[:,i,:] = SubData[:,i,:]-SubData[:,i,:].mean()
-    SubData[:,i,:] = SubData[:,i,:]/(SubData[:,i,:].std(ddof = std))
+    SubData[:,i,:] = SubData[:,i,:]/(SubData[:,i,:].std(ddof = 1))
+SubDataStation = SubData[:,:,st]
 
-SubDataStation = SubData[:,:,st] #Select the station that we are going to analyse
 
-range_n_clusters = [3]
+#Select the desired number of clusters
+n_clusters = 3
 
-for n_clusters in range_n_clusters:
-    #2006-2016
-    data1 = SubDataStation
-    clusterer = KMeans(n_clusters=n_clusters, random_state=10).fit(data1)
-    cluster_labels = clusterer.labels_
-    silhouette_avg = silhouette_score(data1, cluster_labels)   
-    print("For n_clusters =", n_clusters, 
-          "The average silhouette_score is :", silhouette_avg)
-    sample_silhouette_values = silhouette_samples(data1, cluster_labels)
-    #2086-2096
-    # data2 = SubDataStation[:][-3650:]
-    # clusterer2 = KMeans(n_clusters=n_clusters, random_state=10).fit(data2)
-    # cluster_labels2 = clusterer2.labels_
-    # silhouette_avg = silhouette_score(data2, cluster_labels2)   
-    # print("For n_clusters =", n_clusters, 
-    #       "The average silhouette_score is :", silhouette_avg)
-    # sample_silhouette_values = silhouette_samples(data1, cluster_labels)
 
+#Cluster the first 10 years (2006-2016)
+data1 = SubDataStation
+clusterer = KMeans(n_clusters=n_clusters, random_state=10).fit(data1)
+cluster_labels = clusterer.labels_
+silhouette_avg = silhouette_score(data1, cluster_labels)   
+print("For n_clusters =", n_clusters, 
+      "The average silhouette_score is :", silhouette_avg)
+sample_silhouette_values = silhouette_samples(data1, cluster_labels)
+
+#Cluster the last 10 years (2086-2096)
+data2 = SubDataStation[:][-3650:]
+clusterer2 = KMeans(n_clusters=n_clusters, random_state=10).fit(data2)
+cluster_labels2 = clusterer2.labels_
+silhouette_avg = silhouette_score(data2, cluster_labels2)   
+print("For n_clusters =", n_clusters, 
+      "The average silhouette_score is :", silhouette_avg)
+sample_silhouette_values = silhouette_samples(data1, cluster_labels)
+
+
+
+#Retrieve the spread during months and years
 Month_Counter = MonthCounter(cluster_labels,n_clusters)
 Year_Counter = YearCounter(cluster_labels,n_clusters)
-# Year_Counter2 = YearCounter(cluster_labels2,n_clusters)
-# Month_Counter2 = MonthCounter(cluster_labels2,n_clusters)
 
+Year_Counter2 = YearCounter(cluster_labels2,n_clusters)
+Month_Counter2 = MonthCounter(cluster_labels2,n_clusters)
+
+#Plot the results
 fig, axes = plt.subplots(nrows=2, ncols=2)
 ax0, ax1, ax2, ax3 = axes.flatten()
-
 
 ax0.hist(Month_Counter, 12, density=True, histtype='bar')
 ax0.legend(prop={'size': 10})
 ax0.set_title('Divide in months')
 
-# ax2.hist(Month_Counter2, 12, density=True, histtype='bar')
-# ax2.legend(prop={'size': 10})
-# ax2.set_title('Divide in months')
+ax2.hist(Month_Counter2, 12, density=True, histtype='bar')
+ax2.legend(prop={'size': 10})
+ax2.set_title('Divide in months')
 
 ax1.hist(Year_Counter, 10, density=True, histtype='bar')
 ax1.legend(prop={'size': 10})
 ax1.set_title('Divide in years')
 
-# ax3.hist(Year_Counter2, 10, density=True, histtype='bar')
-# ax3.legend(prop={'size': 10})
-# ax3.set_title('Divide in years')
+ax3.hist(Year_Counter2, 10, density=True, histtype='bar')
+ax3.legend(prop={'size': 10})
+ax3.set_title('Divide in years')
