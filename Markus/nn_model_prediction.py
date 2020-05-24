@@ -38,13 +38,16 @@ class Densenet(nn.Module):
 
 
 #Preprocessing
-model_input = models[0]
-model_output = models[1]
+model_input = models[1]
+model_output = models[2]
+
+model_input
+model_output
 
 
 def normalize_data(X):
-    X_prime =  X.sel(station = stations[0], model = model_input, exp = 'rcp45')
-    Y_prime = X.sel(station = stations[0], model = model_output, exp = 'rcp45')
+    X_prime =  X.sel(station = stations[0], model = model_input, exp = 'rcp85')
+    Y_prime = X.sel(station = stations[0], model = model_output, exp = 'rcp85')
 
     xmeans = X_prime.mean(dim = 'time')
     ymeans = Y_prime.mean(dim = 'time')
@@ -66,7 +69,7 @@ X_prime, Y_prime, xstds, ystds, xmeans, ymeans = normalize_data(X)
 #Splitting into Train and Test data
 assert(torch.cuda.is_available()), 'GPU not available, aborting...'
 
-t_size = 1000 #Size of training set
+t_size = 10000 #Size of training set
 
 X_train = torch.tensor(np.array(X_prime[:t_size,:]), dtype = torch.float32).cuda()
 Y_train = torch.tensor(np.array(Y_prime[:t_size,:]), dtype = torch.float32).cuda()
@@ -77,11 +80,12 @@ Y_test = torch.tensor(np.array(Y_prime[t_size:,:]), dtype = torch.float32).cuda(
 
 #Training Loop
 net = Densenet(len(variables), len(variables)).cuda()
+print("Number of parameters " + str(sum(p.numel() for p in net.parameters())))
 writer = SummaryWriter()
 optimizer = torch.optim.Adam(net.parameters(), lr = 0.001)
 
 
-for epoch in range(2000):
+for epoch in range(50000):
     optimizer.zero_grad()
     batch_idx = np.random.randint(low = 0,high = t_size, size = 50)
     minibatch = X_train[batch_idx,:]
@@ -105,7 +109,7 @@ test_error = F.mse_loss(net.forward(X_test), Y_test)
 fig, axs = plt.subplots(len(variables),1, figsize = (30,50))
 for sel_var in range(len(variables)):
 
-    alpha = 0.01
+    alpha = 0.05
     min_periods = 30
 
     predictions = ((net.forward(X_test)[:,sel_var].cpu().detach().numpy()) * ystds[sel_var].values)+ ymeans[sel_var].values
@@ -113,7 +117,7 @@ for sel_var in range(len(variables)):
     ypred = pd.DataFrame(predictions).ewm(alpha = alpha, min_periods = min_periods).mean()
     ypred = np.array(ypred)[:,0]
 
-    ytrue = pd.DataFrame(Y_test[:,sel_var].cpu() * ystds[sel_var].values + ymeans[sel_var].values).ewm(alpha = alpha, adjust = True, min_periods = min_periods).mean()
+    ytrue = pd.DataFrame(Y_test[:,sel_var].cpu().numpy() * ystds[sel_var].values + ymeans[sel_var].values).ewm(alpha = alpha, adjust = True, min_periods = min_periods).mean()
     ytrue = np.array(ytrue)[:,0]
 
 
@@ -124,10 +128,24 @@ for sel_var in range(len(variables)):
     plt.legend()
 
 
-fig.suptitle('Predicting ' + model_output + ' from the first ' + str(t_size) +  ' days of ' + model_input + '. Exponential Weighted Average Plot with smoothing factor ' + str(alpha) + '.', fontsize = 20)
-
+#fig.suptitle('Predicting ' + model_output + ' from the first ' + str(t_size) +  ' days of ' + model_input + '. Exponential Weighted Average Plot with smoothing factor ' + str(alpha) + '.', fontsize = 20)
+#plt.savefig('densepreds.pdf')
 
 #Explicitly plotting averaged temperature
 Y_pred = ((net.forward(X_test)[:,1].cpu().detach().numpy()) * ystds[1].values)+ ymeans[1].values
 pd.DataFrame({'y' : Y_pred}).ewm(alpha = 0.0001, min_periods= 2000).mean().plot()
 plt.title('Exponential weighted Average of predicted tas averaged over all time steps')
+
+
+
+"""#Saving preidctions for later
+for i in range(7):
+    if (i == 0):
+        dense_preds = ((net.forward(X_test)[:,i].cpu().detach().numpy()) * ystds[i].values)+ ymeans[i].values
+    else:
+        dense_preds = np.vstack((dense_preds, ((net.forward(X_test)[:,i].cpu().detach().numpy()) * ystds[i].values)+ ymeans[i].values))
+
+
+
+np.save('dense_preds.npy', dense_preds)
+"""

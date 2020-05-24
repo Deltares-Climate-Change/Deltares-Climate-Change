@@ -8,6 +8,25 @@ import torch.nn as nn
 import torch.nn.functional as F
 from tensorboardX import SummaryWriter
 
+class LSTMAutoencoder(nn.Module):
+    def __init__(self, vars_dim, hidden_dim, input_length):
+        super(LSTMAutoencoder, self).__init__()
+        self.hidden_dim = hidden_dim
+        self.vars_dim = vars_dim
+        self.input_length = input_length
+
+        self.encoder = nn.LSTM(vars_dim,hidden_dim)
+        self.decoder = nn.LSTM(hidden_dim,hidden_dim)
+        self.dense = nn.Linear(hidden_dim*input_length, input_length*vars_dim)
+
+
+    def forward(self, x):
+        encoded, _ = self.encoder(x)
+        hidden_rep = encoded[-1,:,:].repeat(x.shape[0],1,1)
+        decoded, _ = self.decoder(encoded)
+        out = self.dense(torch.flatten(decoded))
+        return out
+
 #Importing the Data
 data = np.load('Datares/tensor_daily_mean_5D.npy')
 X = data_to_xarray(data)
@@ -63,28 +82,6 @@ def seq_fetch(data, labels, treshold, seq_len, var = -1):
     return in_seq.unsqueeze(1), out_seq.unsqueeze(1)
 
 
-
-class LSTMAutoencoder(nn.Module):
-    def __init__(self, vars_dim, hidden_dim, input_length):
-        super(LSTMAutoencoder, self).__init__()
-        self.hidden_dim = hidden_dim
-        self.vars_dim = vars_dim
-        self.input_length = input_length
-
-        self.encoder = nn.LSTM(vars_dim,hidden_dim)
-        self.decoder = nn.LSTM(hidden_dim,hidden_dim)
-        self.dense = nn.Linear(hidden_dim*input_length, input_length*vars_dim)
-
-
-    def forward(self, x):
-        encoded, _ = self.encoder(x)
-        hidden_rep = encoded[-1,:,:].repeat(x.shape[0],1,1)
-        decoded, _ = self.decoder(encoded)
-        out = self.dense(torch.flatten(decoded))
-        return out
-
-
-
 #Training the LSTM
 treshold = 10000
 seq_len = 30
@@ -121,13 +118,7 @@ for epoch in range(50000):
     optimizer.step()
 
 
-
-
-#test_in, test_out = seq_fetch(X_prime,Y_prime, treshold, seq_len,1)
-#plt.plot(np.arange(seq_len),lstm(test_in).view(seq_len,1,7)[:,0,1].cpu().detach().numpy())
-#plt.plot(np.arange(seq_len),test_out[:,0,1].cpu().numpy())
-#preds = np.empty((seq_len,len(variables)))
-
+#Predict test set
 for i in range(treshold,X_prime.shape[0]-seq_len,seq_len):
     if (i == treshold):
         to_predict = torch.tensor(X_prime[i:i+seq_len,:]).unsqueeze(1)
@@ -138,8 +129,8 @@ for i in range(treshold,X_prime.shape[0]-seq_len,seq_len):
 
 
 
-#Plotting
 
+#Plotting
 fig, axs = plt.subplots(len(variables),1, figsize = (30,50))
 for sel_var in range(len(variables)):
 
@@ -162,7 +153,7 @@ for sel_var in range(len(variables)):
 
 
 
-
+"""
 #Saving predictions for visualizing later
 for i in range(7):
     if (i == 0):
@@ -172,7 +163,4 @@ for i in range(7):
         preds_scaled = (preds[:,i] * ystds[i].values)+ ymeans[i].values
         lstm_preds = np.vstack((lstm_preds, preds_scaled))
         ytrue = np.vstack((ytrue, ((Y_prime[:,i].cpu().numpy()) * np.array(ystds[i]) + np.array(ymeans[i]))))
-
-
-#np.save('lstm_preds.npy', lstm_preds)
-np.save('ytrue10k', ytrue[:,treshold:])
+"""
