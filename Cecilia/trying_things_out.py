@@ -4,6 +4,7 @@
 Created on Thu May  7 10:51:40 2020
 
 @author: ceciliacasolo
+
 """
 import numpy as np
 import pandas as pd
@@ -196,16 +197,16 @@ var5.ewm(alpha=0.0001,min_periods= 2000).mean().plot()
 variables = ["rsds","tas","uas","vas","clt","hurs","ps"]
 #Variables
 var1 = X.sel(var='hurs',station= 'Marsdiep Noord' ,exp= 'rcp45', model= 'CNRM-CERFACS-CNRM-CM5')
-var2 = X.sel(var='ps',station= 'Marsdiep Noord' ,exp= 'rcp45', model= 'CNRM-CERFACS-CNRM-CM5')
-var3 = X.sel(var='tas',station= 'Marsdiep Noord' ,exp= 'rcp45', model= 'CNRM-CERFACS-CNRM-CM5')
+var2 = X.sel(var='tas',station= 'Marsdiep Noord' ,exp= 'rcp45', model= 'CNRM-CERFACS-CNRM-CM5')
+var3 = X.sel(var='clt',station= 'Marsdiep Noord' ,exp= 'rcp45', model= 'CNRM-CERFACS-CNRM-CM5')
 var4 = X.sel(var='uas',station= 'Marsdiep Noord' ,exp= 'rcp45', model= 'CNRM-CERFACS-CNRM-CM5')
 var5 = X.sel(var='vas',station= 'Marsdiep Noord' ,exp= 'rcp45', model= 'CNRM-CERFACS-CNRM-CM5')
-var6 = X.sel(var='clt',station= 'Marsdiep Noord' ,exp= 'rcp45', model= 'CNRM-CERFACS-CNRM-CM5')
+var6 = X.sel(var='ps',station= 'Marsdiep Noord' ,exp= 'rcp45', model= 'CNRM-CERFACS-CNRM-CM5')
 var7 = X.sel(var='rsds',station= 'Marsdiep Noord' ,exp= 'rcp45', model= 'CNRM-CERFACS-CNRM-CM5')
 
 newvars=xr.concat([var1, var2, var3, var4, var5, var6], 'var').transpose()
 
-k = 10
+k = 5
 training = 6000
 
 nbrs = NearestNeighbors(n_neighbors=k, algorithm='auto').fit(newvars[:training])
@@ -224,6 +225,15 @@ for i in range(len(indices)):
         appr = appr+np.array(var7[index[j]])*fact
     pred[p] = appr
     p=p+1
+
+N2=33238-6000
+summation=0
+for i in  range(len(indices)):
+    diff=var7[i+6000]-pred[i+6000]
+    sq_diff=(diff)**2
+    summation=summation+sq_diff
+MSE=summation/N2
+
 
 # plotting
 xlst = np.arange(6000)
@@ -250,13 +260,26 @@ pred2.ewm(alpha=0.05,min_periods= 2000).mean().plot(figsize=(15, 10),label='Real
 var7.ewm(alpha=0.05,min_periods= 2000).mean().plot(figsize=(15, 10))
 
 
+dates= pd.date_range(start="2006-01-01",end="2096-12-31")
+pred = xr.DataArray(pred, coords=[dates], dims=['time'])
+pred2=pred.to_pandas()
+var7=var7.to_pandas()
+var7=var7[1:33238]
+pred2=pred2[1:33238]
 fig = plt.figure(figsize=(20,10))
 ax = plt.subplot(111)
-ax.plot(pred2.ewm(alpha=0.05,min_periods= 2000).mean(),label="Prediction temperature")
-ax.plot(var7.ewm(alpha=0.05,min_periods= 2000).mean(),label="Temperature")
+ax.plot(pred2.ewm(alpha=0.05,min_periods= 2000).mean(),label="Prediction radiation")
+ax.plot(var7.ewm(alpha=0.05,min_periods= 2000).mean(),label="Radiation")
 ax.legend()
 
 
+var77=var7[20000:25000]
+pred22=pred2[20000:25000]
+fig = plt.figure(figsize=(20,10))
+ax = plt.subplot(111)
+ax.plot(pred22.ewm(alpha=0.05,min_periods= 2000).mean(),label="Prediction radiation")
+ax.plot(var77.ewm(alpha=0.05,min_periods= 2000).mean(),label="Radiation")
+ax.legend()
 
 
 
