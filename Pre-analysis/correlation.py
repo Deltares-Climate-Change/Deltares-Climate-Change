@@ -5,7 +5,7 @@ from utils.common import data_to_xarray
 import seaborn as sns
 from scipy.stats import spearmanr
 
-data = np.load('Deltares/tensor_daily_mean_5D.npy')
+data = np.load('Datares/tensor_daily_mean_5D.npy')
 X = data_to_xarray(data)
 X.head()
 

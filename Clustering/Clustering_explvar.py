@@ -3,7 +3,11 @@
 """
 Created on Thu Apr 30 10:04:30 2020
 
-@author: maaike
+@author: Maaike
+
+This python script creates and analyzes clusters for any desired number of clusters,
+models, experiments, and stations. It takes these numbers as input, and outputs
+a figure with the characteristics of the created clusters, as well as 
 """
 
 import datetime
@@ -28,13 +32,15 @@ def YearCounter(Labels,n_clusters):
         Dag += datetime.timedelta(days = 1)
     return(Dat)
 
+
+#Load the data and remove the NaN entries
 Data = np.load('../Datares/tensor_daily_mean_5D.npy')
 NanINDX = np.argwhere(np.isnan(Data))
 for i in range(len(NanINDX)):
     Data[NanINDX[i][0],NanINDX[i][1],NanINDX[i][2],NanINDX[i][3],NanINDX[i][4]] = 200
 
 
-st = 0
+
 STATIONS = ['Marsdiep Noord','Doove Balg West',
                 'Vliestroom','Doove Balg Oost',
                 'Blauwe Slenk Oost','Harlingen Voorhaven','Dantziggat',
@@ -53,7 +59,7 @@ STATIONS = ['Marsdiep Noord','Doove Balg West',
 9 'Harlingen Havenmond West'
 """
 
-mdl = 0
+
 MODELS = ['CNRM-CERFACS-CNRM-CM5','ICHEC-EC-EARTH', 
           'IPSL-IPSL-CM5A-MR','MOHC-HadGEM2-ES','MPI-M-MPI-ESM-LR']
 """
@@ -72,83 +78,51 @@ VARIABLES = ['Surface Downwelling Shortwave Radiation',
              'Near-surface relative humidity',
              'Surface pressure']
 
-exp = 0
+
 EXPERIMENTS = ['rcp45','rcp85']
 
-CLUSTERS = [2,4]
+CL      = [2,4] #Select the desired number of clusters
+ST      = [9] #select the desired stations
+MDL     = [3] #select the desired models
+EXP     = [1] #select the desired experiments
 
-for st in range(9,10):
-    for mdl in range(3,4):
-        for exp in range(len(EXPERIMENTS)):
-            for n_cl in range(len(CLUSTERS)):  
+for st in ST:
+    for mdl in MDL:
+        for exp in EXP:
+            for n_cl in CL:  
+                #Select the desired data and normalize the variables
                 SubData = Data[:,:,:,mdl,exp]
-                
-                std = 1
                 for i in range(SubData.shape[1]):
                     SubData[:,i,:] = SubData[:,i,:]-SubData[:,i,:].mean()
-                    SubData[:,i,:] = SubData[:,i,:]/(SubData[:,i,:].std(ddof = std))
+                    SubData[:,i,:] = SubData[:,i,:]/(SubData[:,i,:].std(ddof = 1))
+                SubDataStation = SubData[:,:,st] 
                 
-                SubDataStation = SubData[:,:,st] #Select the station that we are going to analyse
                 
-                range_n_clusters = [CLUSTERS[n_cl]]
+                #Perform the KMeans algorithm on the data
+                n_clusters = n_cl
+                clusterer = KMeans(n_clusters=n_clusters, random_state=10).fit(SubDataStation)
+                cluster_labels = clusterer.labels_
+                silhouette_avg = silhouette_score(SubDataStation, cluster_labels)
                 
-                for n_clusters in range_n_clusters:
-                    clusterer = KMeans(n_clusters=n_clusters, random_state=10).fit(SubDataStation)
-                    cluster_labels = clusterer.labels_
-                    silhouette_avg = silhouette_score(SubDataStation, cluster_labels)
-                    
-                    
-                    
-                    print("For n_clusters =", n_clusters, 
-                          "The average silhouette_score is :", silhouette_avg)
-                    sample_silhouette_values = silhouette_samples(SubDataStation, cluster_labels)
+                #Print the average silhouette score for the clusters
+                print("For n_clusters =", n_clusters, 
+                      "The average silhouette_score is :", silhouette_avg)
+                sample_silhouette_values = silhouette_samples(SubDataStation, cluster_labels)
                    
                     
                 cluster_labels_array = np.array(cluster_labels)
                 n_in_clusters = []
                 n_in_clusteri = 0
-                for i in range(range_n_clusters[0]):
+                for i in range(n_cl):
                     n_in_clusteri = len(np.where(cluster_labels_array == i)[0])
                     n_in_clusters.append(n_in_clusteri)
                     print('The number of datapoints in cluster '+str(i)+' is: '+str(n_in_clusteri))
-                    
-                
+                        
                 
                 ## Plotting the clusters in bar plots over the months and years
                 Month_Counter = MonthCounter(cluster_labels,n_clusters)
                 Year_Counter = YearCounter(cluster_labels,n_clusters)
-    #            
-    #            fig, axes = plt.subplots(nrows=1, ncols=2)
-    #            ax0, ax1 = axes.flatten()
-    #            
-    #            ax0.hist(Month_Counter, 12, density=True, histtype='bar')
-    #            ax0.legend(prop={'size': 10})
-    #            ax0.set_title('Divide in months')
-    #            
-    #            
-    #            ax1.hist(Year_Counter, 10, density=True, histtype='bar')
-    #            ax1.legend(prop={'size': 10})
-    #            ax1.set_title('Divide in years')
-    #            
-    #            ## Plotting the variables in box plots of the different clusters standardised
-    #            fig = plt.figure(2, figsize = (30,16))
-    #            fig.suptitle('Paramater destribution per cluster standardised',size = 'xx-large')
-    #            LAB = ['cluster 1', 'cluster 2']
-    #            for var in range(7):
-    #            #var = 0
-    #                ax = fig.add_subplot(4, 2, var+1)
-    #                ax.set_title(VARIABLES[var])
-    #                M = []
-    #                INDX = []
-    #                for cl in range(n_clusters):
-    #                    INDX = np.where(cluster_labels_array == cl)
-    #                    new = SubDataStation[INDX,var]
-    #                    M.append(new[0])
-    #            #    M.append(Data[:,var,st, mdl, exp])
-    #                ax.boxplot(M)
-    #                plt.grid(True)
-    #            fig.savefig('Clustering_exploring_variables_percluster_standardised.png', bbox_inches='tight')
-    #            
+       
                 Data = np.load('../Datares/tensor_daily_mean_5D.npy')
                 NanINDX = np.argwhere(np.isnan(Data))
                 for i in range(len(NanINDX)):
@@ -156,8 +130,8 @@ for st in range(9,10):
                 
                 ## Plotting the variables in box plots of the different clusters 
                 fig = plt.figure(3, figsize = (18,10))
-                Suptitle = 'Distribution: '+ STATIONS[st]+', '+MODELS[mdl]+', '+EXPERIMENTS[exp]+', '+str(range_n_clusters[0])+' clusters'
-                fig.suptitle(Suptitle,size = 'xx-large')
+                #Suptitle = 'Distribution: '+ STATIONS[st]+', '+MODELS[mdl]+', '+EXPERIMENTS[exp]+', '+str(range_n_clusters[0])+' clusters'
+                #fig.suptitle(Suptitle,size = 'xx-large')
                 for var in range(7):
                 #var = 0
                     ax = fig.add_subplot(2, 4, var+1)
@@ -173,26 +147,26 @@ for st in range(9,10):
                     plt.grid(True)
                 
                 ax = fig.add_subplot(2,4,8)  
-                leg = ['Cluster '+str(i+1) for i in range(range_n_clusters[0])] 
+                leg = ['Cluster '+str(i+1) for i in range(n_cl)] 
                 ax.hist(Month_Counter ,12, label = leg, density=True, histtype='bar')
                 ax.legend(prop={'size': 10})
                 ax.set_title('Clustering distribution over the year')
-                figname = 'ClusExpVar_'+STATIONS[st]+'_'+MODELS[mdl]+'_'+EXPERIMENTS[exp]+'_'+str(range_n_clusters[0])+'_clusters.png'
+                plt.show()
+                figname = 'ClusExpVar_'+STATIONS[st]+'_'+MODELS[mdl]+'_'+EXPERIMENTS[exp]+'_'+str(n_cl)+'_clusters.png'
                 fig.savefig(figname, bbox_inches='tight')
                 
-                plt.show()
                 plt.close('all')
                 
                 
                 #Export clusters to .npy file
-                A = np.zeros((CLUSTERS[n_cl],2*len(VARIABLES)+1))
-                for c in range(CLUSTERS[n_cl]):
+                A = np.zeros((n_cl,2*len(VARIABLES)+1))
+                for c in range(n_cl):
                     A[c,0]= n_in_clusters[c]
                     for v in range(len(VARIABLES)):
                         INDX = np.where(cluster_labels_array == c)
                         new = Data[INDX,v,st, mdl, exp]
                         A[c,2*v+1] = np.mean(new)
                         A[c,2*v+2] = np.std(new)
-                filename = 'ClusExpVar_'+STATIONS[st]+'_'+MODELS[mdl]+'_'+EXPERIMENTS[exp]+'_'+str(range_n_clusters[0])+'_clusters.npy'
+                filename = 'ClusExpVar_'+STATIONS[st]+'_'+MODELS[mdl]+'_'+EXPERIMENTS[exp]+'_'+str(n_cl)+'_clusters.npy'
                 np.save(filename,A)
                     
